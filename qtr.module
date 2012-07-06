@@ -1,0 +1,36 @@
+<?php
+
+require_once 'qtr.inc';
+
+function qtr_menu() {
+  $items = array();
+
+  $items['qtrdemo'] = array(
+    'title' => 'QTR demonstration',
+    'description' => 'Running QTR on sample data',
+    'page callback' => 'qtr_demo',
+    'access arguments' => array('access QTR demonstration'),
+  );
+
+  $items['admin/qtr'] = array(
+    'title' => 'QTR',
+    'description' => 'QTR settings',
+    'page callback' => 'qtr_settings',
+    'access arguments' => array('administer QTR'),
+  );
+
+  return $items;
+}
+
+function qtr_demo() {
+  qtr_from_file(drupal_get_path('module', 'qtr') . '/EF_complete_new.dat');
+  return '';
+}
+
+function qtr_from_file($user_item, $trust = NULL) {
+  $agent = $item = NULL;
+  _qtr_init($agent, $item, 3511, 597);
+  _qtr_read($agent, $item, $user_item, $trust);
+  _qtr_calculate($agent, $item, $trust, 695);
+}
+
