@@ -5,21 +5,117 @@ require_once 'qtr.inc';
 function qtr_menu() {
   $items = array();
 
-  $items['qtrdemo'] = array(
+  $items['qtr/demo'] = array(
     'title' => 'QTR demonstration',
     'description' => 'Running QTR on sample data',
     'page callback' => 'qtr_demo',
     'access arguments' => array('access QTR demonstration'),
   );
 
-  $items['admin/qtr'] = array(
+  $items['qtr/settings'] = array(
     'title' => 'QTR',
     'description' => 'QTR settings',
-    'page callback' => 'qtr_settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('qtr_settings'),
     'access arguments' => array('administer QTR'),
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function qtr_permission() {
+  return array(
+    'access QTR demonstration' => array('title' => t('Access QTR demonstration')),
+    'administer QTR' => array('title' => t('Administer QTR')),
+  );
+}
+
+function qtr_settings($form, &$form_state) {
+  $form['params'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Parameters'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  $form['params']['qtr_delta'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Delta'),
+    '#description' => t('N.B.: if the effective number of AGENTS/ITEMS is lower (i.e. if there are gaps in the input file), the renormalization of the algorithm has to change. Better to have no gaps!'),
+    '#default_value' => variable_get('qtr_delta', 0.00000000001),
+  );
+
+  $form['params']['qtr_w_upload'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Weight of upload action'),
+    '#default_value' => variable_get('qtr_w_upload', 1.0),
+  );
+
+  $form['params']['qtr_w_download'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Weight of download action'),
+    '#default_value' => variable_get('qtr_w_download', 0.1),
+  );
+
+  $form['params']['qtr_w_view'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Weight of view action'),
+    '#default_value' => variable_get('qtr_w_view', 0.05),
+  );
+
+  $form['params']['qtr_decay'] = array(
+    '#type' => 'select',
+    '#title' => t('Time-decay of scores'),
+    '#options' => array(0 => 'no decay', 1 => 'power-decay', 2 => 'exponential decay', 3 => 'theta-decay'),
+    '#default_value' => variable_get('qtr_decay', 0),
+  );
+
+  $form['params']['qtr_tau0'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Time scale of the decay'),
+    '#default_value' => variable_get('qtr_tau0', 50),
+  );
+
+  $form['params']['qtr_renorm_q'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Renormalization of quality'),
+    '#default_value' => variable_get('qtr_renorm_q', 0),
+  );
+
+  $form['params']['qtr_renorm_r'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Renormalization of reputation'),
+    '#default_value' => variable_get('qtr_renorm_r', 0),
+  );
+
+  $form['params']['qtr_renorm_t'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Renormalization of trust'),
+    '#default_value' => variable_get('qtr_renorm_t', 0),
+  );
+
+  $form['params']['qtr_resc_q'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Rescaled quality'),
+    '#default_value' => variable_get('qtr_resc_q', 0),
+  );
+
+  $form['params']['qtr_resc_r'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Rescaled reputation'),
+    '#default_value' => variable_get('qtr_resc_r', 0),
+  );
+
+  $form['params']['qtr_resc_t'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Rescaled trust'),
+    '#default_value' => variable_get('qtr_resc_t', 0),
+  );
+
+  return system_settings_form($form);
 }
 
 function qtr_demo() {

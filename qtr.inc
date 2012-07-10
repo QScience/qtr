@@ -4,28 +4,6 @@
  * Private QTR settings and functions.
  */
 
-// N.B.: if the effective number of AGENTS/ITEMS is lower (i.e. if there are gaps in the input file), the renormalization of the algorithm has to change.
-// Better to have no gaps!
-define('delta', 0.00000000001);
-
-/* weights of actions */
-define('W_upload', 1.0); /* weight of upload action */
-define('W_download', 0.1); /* weight of download action */
-define('W_view', 0.05); /* weight of view action */
-//we can add others if also other actions are possible
-
-/* time-decay of scores */
-define('DEC', 0); /* 0 for deactivate decay, 1 for power-decay, 2 for exponential-decay, 3 for theta-decay */
-define('tau0', 50); /* time scale of the decay --- in the unit time is measured */
-
-/* specifics of the algorithms: parameters in the range [0,1] */
-define('RENORM_Q', 0); /* for renormalization of quality */
-define('RENORM_R', 0); /* for renormalization of reputation */
-define('RENORM_T', 0); /* for renormalization of trust */
-define('RESC_Q', 0); /* for rescaled quality */
-define('RESC_R', 0); /* for rescaled reputation */
-define('RESC_T', 0); /* for rescaled trust */
-
 function _qtr_save($agent, $item, $agent_file, $item_file) {
   $ofs_AG = fopen($agent_file, "w");
   $ofs_IT = fopen($item_file, "w");
@@ -82,13 +60,13 @@ function _qtr_read(&$agent, &$item, $user_item_file, $trust) {
       // follows the way weights are expressed.
       switch ($rating) {
       case "U":
-        $rw = W_upload;
+        $rw = variable_get('qtr_w_upload', 1.0);
         break;
       case "D":
-        $rw = W_download;
+        $rw = variable_get('qtr_w_download', 0.1);
         break;
       case "V":
-        $rw = W_view;
+        $rw = variable_get('qtr_w_view', 0.05);
         break;
       }
       $item[$a]['r_weight'][] = $rw;
@@ -111,13 +89,14 @@ function _qtr_read(&$agent, &$item, $user_item_file, $trust) {
 }
 
 function _qtr_decay($tau) {
-  switch (DEC) {
+  $tau0 = variable_get('qtr_tau0', 50);
+  switch (variable_get('qtr_decay', 0)) {
   case 1:
-    return pow(1. + ((double)$tau) / tau0, -1);
+    return pow(1. + ((double)$tau) / $tau0, -1);
   case 2:
-    return exp(-((double)$tau) / tau0);
+    return exp(-((double)$tau) / $tau0);
   case 3:
-    return $tau <= tau0 ? 1.0 : 0.0;
+    return $tau <= $tau0 ? 1.0 : 0.0;
   default:
     return 1.0;
   }
@@ -148,14 +127,14 @@ function _qtr_calculate($agent, $item, $trust, $start) {
 
   // iterations //
   $flag = 0;
-  while ($err > delta) {
+  while ($err > variable_get('qtr_delta', 0.00000000001)) {
     $err = 0;
     $norm = 0;
     for ($a = 0; $a < count($item); $a++) {
       $item[$a]['quality'] = 0;
       for ($r = 0; $r < count($item[$a]['reader']); $r++) {
-        $item[$a]['quality'] += $item[$a]['r_weight'][$r] * ($agent[$item[$a]['reader'][$r]]['r_tmp'] - RESC_R * $avg_r) * _qtr_decay($start - $item[$a]['r_time'][$r]) /
-          pow(count($item[$a]['reader']), RENORM_Q);
+        $item[$a]['quality'] += $item[$a]['r_weight'][$r] * ($agent[$item[$a]['reader'][$r]]['r_tmp'] - variable_get('qtr_resc_r', 0) * $avg_r) * _qtr_decay($start - $item[$a]['r_time'][$r]) /
+          pow(count($item[$a]['reader']), variable_get('qtr_renorm_q', 0));
       }
       $norm += pow($item[$a]['quality'], 2);
     }
@@ -169,12 +148,12 @@ function _qtr_calculate($agent, $item, $trust, $start) {
     for ($i = 0; $i < count($agent); $i++) {
       $agent[$i]['reputation'] = 0;
       for ($a = 0; $a < count($agent[$i]['collection']); $a++) {
-        $agent[$i]['reputation'] += $agent[$i]['c_weight'][$a] * ($item[$agent[$i]['collection'][$a]]['q_tmp'] - RESC_Q * $avg_q) *
-          _qtr_decay($start - $agent[$i]['c_time'][$a]) / pow(count($agent[$i]['collection']), RENORM_R);
+        $agent[$i]['reputation'] += $agent[$i]['c_weight'][$a] * ($item[$agent[$i]['collection'][$a]]['q_tmp'] - variable_get('qtr_resc_q', 0) * $avg_q) *
+          _qtr_decay($start - $agent[$i]['c_time'][$a]) / pow(count($agent[$i]['collection']), variable_get('qtr_renorm_r', 0));
       }
       if ($trust !== NULL) {
         for ($j = 0; $j < count($agent[$i]['neighbor']); $j++) {
-          $agent[$i]['reputation'] += ($agent[$agent[$i]['neighbor'][$j]]['r_tmp'] - RESC_T * $avg_r) * ($agent[$i]['t_exp'][$j] - RESC_T * $avg_t) /
+          $agent[$i]['reputation'] += ($agent[$agent[$i]['neighbor'][$j]]['r_tmp'] - variable_get('qtr_resc_t', 0) * $avg_r) * ($agent[$i]['t_exp'][$j] - variable_get('qtr_resc_t', 0) * $avg_t) /
             pow($agent[$i]['reputation'], 2);
         }
       }

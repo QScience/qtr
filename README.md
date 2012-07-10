@@ -4,14 +4,13 @@ QTR algorithm as a Drupal 7.x module
 Usage
 ---
 
-You can access the demonstration page at ``/qtrdemo``.
+You can access the demonstration page at ``/qtr/demo``. The parameters can be
+set at ``/qtr/settings``.
 
 To Do
 ---
 
- - Being able to set parameters through the administration interface
-
- - Load the data from the database
+ - Load the data from the database and other sources
 
  - Optimizations
 
