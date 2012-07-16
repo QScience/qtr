@@ -2,7 +2,7 @@
 
 function qtr_schema() {
 
-	$schema['qtr_actions'] = array (
+	$schema['qtr_action_types'] = array (
   	'description' => 'Stores the list of available actions for computing QTR',
     'fields' => array(
 	    'action' => array(
@@ -21,7 +21,7 @@ function qtr_schema() {
 	 'primary key' => array('action'),
 	);
 	
-	$schema['qtr'] = array(
+	$schema['qtr_actions'] = array(
 		'description' => 'Stores information of users interaction with items (papers).',
     'fields' => array(
 			'id' => array(
@@ -60,7 +60,7 @@ function qtr_schema() {
         'description' => 'The time at which the action took place',    
       ),
     ),
-    'primary_key' => array('id'),
+    'primary key' => array('id'),
     'foreign keys' => array(
     	'user_fkey' => array(
       	'table' => 'users',
@@ -80,6 +80,25 @@ function qtr_schema() {
 			'qtr_node_type'   => array('ntype'),
 			'qtr_action'			=> array('action'),
 		),
+	);
+	
+		$schema['qtr_users'] = array (
+  	'description' => 'Stores the results of the computation of the QTR',
+    'fields' => array(
+	    'uid' => array(
+		     'type' => 'varchar',
+		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'Alphanumeric id for a QTR action',
+	  	),
+		  'value' => array(
+		  	'type' => 'float',
+		    'unsigned' => TRUE,
+        'not null' => TRUE,
+		    'description' => 'The description of the QTR action',
+			),
+	 ),
+	 'primary key' => array('uid'),
 	);
 	
 	return $schema;
