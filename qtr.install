@@ -1,0 +1,86 @@
+<?php
+
+function qtr_schema() {
+
+	$schema['qtr_actions'] = array (
+  	'description' => 'Stores the list of available actions for computing QTR',
+    'fields' => array(
+	    'action' => array(
+		     'type' => 'varchar',
+		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'Alphanumeric id for a QTR action',
+	  	),
+		  'description' => array(
+		  	'type' => 'varchar',
+		    'length' => 256,
+		    'not null' => TRUE,
+		    'description' => 'The description of the QTR action',
+			),
+	 ),
+	 'primary key' => array('action'),
+	);
+	
+	$schema['qtr'] = array(
+		'description' => 'Stores information of users interaction with items (papers).',
+    'fields' => array(
+			'id' => array(
+				'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'primary identifier',
+			),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The user id from the users table',
+      ),
+      'nid' => array(
+				'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The item id from the node table',    
+      ),
+      'ntype' => array(
+				'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The item type id from the node_type table',    
+      ),
+      'action' => array(
+				'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The action type id from the qtr_actions table',    
+      ),
+      'time' => array(
+				'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The time at which the action took place',    
+      ),
+    ),
+    'primary_key' => array('id'),
+    'foreign keys' => array(
+    	'user_fkey' => array(
+      	'table' => 'users',
+      	'columns' => array('uid' => 'uid'),
+     	),
+     	'nid_fkey' => array(
+     		'table' => 'node',
+     		'columns' => array('nid' => 'nid'),
+     	),
+     	'type_fkey' => array(
+     		'table' => 'node',
+     		'columns' => array('nid' => 'nid'),	
+     	),
+		),
+		'indexes' => array(
+    	'qtr_user'        => array('uid'),
+			'qtr_node_type'   => array('ntype'),
+			'qtr_action'			=> array('action'),
+		),
+	);
+	
+	return $schema;
+}
