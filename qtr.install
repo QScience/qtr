@@ -2,12 +2,55 @@
 
 function qtr_schema() {
 
+	$schema['qtr_item_types'] = array (
+  	'description' => 'Stores the list of available items for computing QTR',
+    'fields' => array(
+	    'item_type' => array(
+		     'type' => 'varchar',
+		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'Alphanumeric id for a QTR type',
+	  	),
+	  	'table' => array(
+		     'type' => 'varchar',
+		     'length' => 128,
+		     'not null' => TRUE,
+		     'description' => 'The reference table for the item type, E.g. node or comments',
+	  	),
+		  'description' => array(
+		  	'type' => 'varchar',
+		    'length' => 256,
+		    'not null' => TRUE,
+		    'description' => 'The description of the QTR action',
+			),
+	 ),
+	 'primary key' => array('item_type'),
+	);
+	
 	$schema['qtr_action_types'] = array (
   	'description' => 'Stores the list of available actions for computing QTR',
     'fields' => array(
+			'id' => array(
+				'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'primary identifier',
+			),
 	    'action' => array(
 		     'type' => 'varchar',
 		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'Alphanumeric id for a QTR action',
+	  	),
+			'item_type' => array(
+		     'type' => 'varchar',
+		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'Alphanumeric id for a QTR type',
+	  	),
+	  	'weight' => array(
+		     'type' => 'float',
+		     'unsigned' => FALSE,
 		     'not null' => TRUE,
 		     'description' => 'Alphanumeric id for a QTR action',
 	  	),
@@ -18,11 +61,17 @@ function qtr_schema() {
 		    'description' => 'The description of the QTR action',
 			),
 	 ),
-	 'primary key' => array('action'),
+	 'primary key' => array('id'),
+	 'foreign keys' => array(
+    	'action_type_item_type_fkey' => array(
+      	'table' => 'qtr_item_types',
+      	'columns' => array('item_type' => 'item_type'),
+     	),
+		),
 	);
 	
 	$schema['qtr_actions'] = array(
-		'description' => 'Stores information of users interaction with items (papers).',
+		'description' => 'Stores information of users interaction with items (e.g. news)',
     'fields' => array(
 			'id' => array(
 				'type' => 'serial',
@@ -30,25 +79,19 @@ function qtr_schema() {
         'not null' => TRUE,
         'description' => 'primary identifier',
 			),
-      'uid' => array(
+      'user' => array(
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'description' => 'The user id from the users table',
       ),
-      'nid' => array(
+      'item' => array(
 				'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => 'The item id from the node table',    
+        'description' => 'The item id from the table referenced in the qtr_item_types table',    
       ),
-      'ntype' => array(
-				'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'The item type id from the node_type table',    
-      ),
-      'action' => array(
+      'action_type' => array(
 				'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -62,28 +105,23 @@ function qtr_schema() {
     ),
     'primary key' => array('id'),
     'foreign keys' => array(
-    	'user_fkey' => array(
+    	'qtr_actions_user_fkey' => array(
       	'table' => 'users',
-      	'columns' => array('uid' => 'uid'),
+      	'columns' => array('user' => 'uid'),
      	),
-     	'nid_fkey' => array(
-     		'table' => 'node',
-     		'columns' => array('nid' => 'nid'),
-     	),
-     	'type_fkey' => array(
-     		'table' => 'node',
-     		'columns' => array('nid' => 'nid'),	
+     	'qtr_actions_action_type_fkey' => array(
+     		'table' => 'qtr_action_types',
+     		'columns' => array('action_type' => 'id'),
      	),
 		),
 		'indexes' => array(
-    	'qtr_user'        => array('uid'),
-			'qtr_node_type'   => array('ntype'),
-			'qtr_action'			=> array('action'),
+    	'qtr_user'        => array('user'),
+			'qtr_action_type'   => array('action_type'),
 		),
 	);
 	
-		$schema['qtr_users'] = array (
-  	'description' => 'Stores the results of the computation of the QTR',
+	$schema['qtr_reputation'] = array (
+  	'description' => 'Stores the average QTR REPUTATION for a user ',
     'fields' => array(
 	    'uid' => array(
 		     'type' => 'varchar',
@@ -91,7 +129,7 @@ function qtr_schema() {
 		     'not null' => TRUE,
 		     'description' => 'Alphanumeric id for a QTR action',
 	  	),
-		  'value' => array(
+		  'reputation' => array(
 		  	'type' => 'float',
 		    'unsigned' => TRUE,
         'not null' => TRUE,
@@ -99,6 +137,74 @@ function qtr_schema() {
 			),
 	 ),
 	 'primary key' => array('uid'),
+	);
+	
+	$schema['qtr_quality'] = array (
+  	'description' => 'Stores the results of the computation of the QTR',
+    'fields' => array(
+	    'user' => array(
+		     'type' => 'varchar',
+		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'The user id from the users table',
+	  	),
+	  	'item' => array(
+				'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The item id from the table referenced in the qtr_item_types table',    
+      ),
+	  	'item_type' => array(
+				'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The item type id from the qtr_item_types table',    
+      ),
+      'reputation' => array(
+		  	'type' => 'float',
+		    'unsigned' => TRUE,
+        'not null' => TRUE,
+		    'description' => 'The description of the QTR action',
+			),
+		  'quality' => array(
+		  	'type' => 'float',
+		    'unsigned' => TRUE,
+        'not null' => TRUE,
+		    'description' => 'The QTR QUALITY of an item',
+			),
+	 ),
+	 'primary key' => array('user', 'item'),
+	 'foreign keys' => array(
+    	'qtr_quality_item_type_fkey' => array(
+      	'table' => 'qtr_item_types',
+      	'columns' => array('item_type' => 'item_type'),
+     	),
+		),
+	);
+	
+	$schema['qtr_trust'] = array (
+  	'description' => 'Stores the results of the computation of the QTR',
+    'fields' => array(
+	    'user1' => array(
+		     'type' => 'varchar',
+		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'The user id from the users table',
+	  	),
+	  	'user2' => array(
+		     'type' => 'varchar',
+		     'length' => 64,
+		     'not null' => TRUE,
+		     'description' => 'The user id from the users table',
+	  	),
+		  'trust' => array(
+		  	'type' => 'float',
+		    'unsigned' => TRUE,
+        'not null' => TRUE,
+		    'description' => 'The value for the QTR TRUST of user1 towards user2',
+			),
+	 ),
+	 'primary key' => array('user1', 'user2'),
 	);
 	
 	return $schema;
