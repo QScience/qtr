@@ -102,7 +102,7 @@ function _qtr_decay($tau) {
   }
 }
 
-function _qtr_calculate($agent, $item, $trust, $start) {
+function _qtr_calculate(&$agent, &$item, $trust, $start) {
   drupal_set_message(t('Starting QTR'));
 
   // initializing the error an the average values; computing average trust //

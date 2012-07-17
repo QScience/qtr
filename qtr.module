@@ -128,5 +128,11 @@ function qtr_from_file($user_item, $trust = NULL) {
   _qtr_init($agent, $item, 3511, 597);
   _qtr_read($agent, $item, $user_item, $trust);
   _qtr_calculate($agent, $item, $trust, 695);
+  
+  //write the result of reputation of user and quality of paper into files
+  $path_agents = drupal_get_path('module', 'qtr') . "/agent_file";
+  $path_items = drupal_get_path('module', 'qtr') . "/item_file";
+  
+  _qtr_save($agent, $item, $path_agents,$path_items);
 }
 
