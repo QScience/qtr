@@ -7,11 +7,25 @@
 function _qtr_save($agent, $item, $agent_file, $item_file) {
   $ofs_AG = fopen($agent_file, "w");
   $ofs_IT = fopen($item_file, "w");
+  $sorted_agent = array();
+  $sorted_item = array();
+//save users' rank
   for ($i = 0; $i < count($agent); $i++) {
-    fwrite($ofs_AG, "$i\t" . $agent[$i]['reputation'] . "\n");
+  	$sorted_agent += array ($i => $agent[$i]['reputation']);
   }
+  arsort($sorted_agent);
+  foreach($sorted_agent as $key => $value){
+  	fwrite($ofs_AG, "$key\t" . $value . "\n");
+  }
+  
+  //save the item ranking into a file
   for ($a = 0; $a < count($item); $a++) {
-    fwrite($ofs_IT, "$a\t" . $item[$a]['quality'] . "\n");
+  	$sorted_item += array ($a => $item[$a]['quality']);
+    //fwrite($ofs_IT, "$a\t" . $item[$a]['quality'] . "\n");
+  }
+  arsort($sorted_item);
+  foreach($sorted_item as $key1 => $value1){
+  	fwrite($ofs_IT, "$key1\t" . $value1 . "\n");
   }
   fclose($ofs_AG);
   fclose($ofs_IT);
@@ -178,7 +192,7 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
     $flag++;
     drupal_set_message($flag . " " . $err);
   }
-  
+  //print_r($agent);
   // TODO save the values to the database
   // qtr_write_values($table, $ids = array(), $values) {
   
