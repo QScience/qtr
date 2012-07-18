@@ -125,7 +125,7 @@ function qtr_demo() {
 
 function qtr_from_file($user_item, $trust = NULL) {
   $agent = $item = NULL;
-  _qtr_init($agent, $item, 3511, 597);
+  _qtr_init($agent, $item, 50, 1000);
   _qtr_read($agent, $item, $user_item, $trust);
   _qtr_calculate($agent, $item, $trust, 695);
   
