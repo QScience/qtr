@@ -188,7 +188,8 @@ function qtr_block_view($delta = ''){
   if($delta == 'popular'){
       $node_rep = drupal_get_path('module', 'qtr') . "/item_file"; 
       $showlist=array();$count=0;
-      if($ifs = file($node_rep)){
+      if(file_exists($node_rep)){
+       $ifs = file($node_rep);
         foreach ($ifs as $line) {
           $words = explode("\t", $line);
           $i = (int) $words[0];
