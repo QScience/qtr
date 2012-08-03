@@ -73,8 +73,8 @@ function _qtr_read(&$agent, &$item, $user_item_file, $trust) {
       $item[$a]['r_time'][] = $time; $agent[$i]['c_time'][] = $time;
       // follows the way weights are expressed.
       switch ($rating) {
-      case "U":
-        $rw = variable_get('qtr_w_upload', 1.0);
+      case "vote":
+        $rw = variable_get('qtr_w_vote', 1.0);
         break;
       case "D":
         $rw = variable_get('qtr_w_download', 0.1);

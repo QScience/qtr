@@ -4,4 +4,5 @@ core = 7.x
 version = 7.x-1.x-dev
 package = Reputation
 
+dependencies[] = plus1
 files[] = qtr.install

@@ -1,23 +1,36 @@
 <?php
 
 require_once 'qtr.inc';
+require_once 'qtr.api.inc';
 
 function qtr_menu() {
   $items = array();
 
-  $items['qtr/demo'] = array(
+/*  $items['qtr/demo'] = array(
     'title' => 'QTR demonstration',
     'description' => 'Running QTR on sample data',
     'page callback' => 'qtr_demo',
     'access arguments' => array('access QTR demonstration'),
-  );
+  );*/
 
-  $items['qtr/settings'] = array(
+  $items['admin/config/user-interface/qtr'] = array(
     'title' => 'QTR',
     'description' => 'QTR settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('qtr_settings'),
     'access arguments' => array('administer QTR'),
+  );
+  $items['admin/config/user-interface/qtr/Parameters'] = array(
+    'title' => 'Parameters',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/config/user-interface/qtr/item'] = array(
+    'title' => 'Item',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('qtr_set_form'),
+    'access arguments' => array('administer QTR'),
+    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
@@ -28,12 +41,48 @@ function qtr_menu() {
  */
 function qtr_permission() {
   return array(
-    'access QTR demonstration' => array('title' => t('Access QTR demonstration')),
+  //  'access QTR demonstration' => array('title' => t('Access QTR demonstration')),
     'administer QTR' => array('title' => t('Administer QTR')),
   );
 }
 
+function qtr_set_form($form, &$form_state){
+	$form= array();
+	$posttype = array ();$default = array();
+	$types=qtr_get_itemtype();
+	if($types){
+		foreach($types as $type){
+			$default[]=$type->item_type;
+		}
+	}
+    foreach (node_type_get_types() as $type => $type_obj) {
+            $posttype[$type] = $type_obj->name;
+    }
+    $form['content_type'] = array(
+      '#type' => 'checkboxes', 
+      '#title' => t('Content type to be considered: '), 
+      '#options' => $posttype,
+      '#default_value' => $default,
+    );
+    $form['submit']=array(
+    	'#type'=>'submit',
+    	'#value'=>t('Save'),
+    );
+    return $form;	
+}
+function qtr_set_form_submit($form, &$form_state){
+	$result=array();
+	$types=$form_state['values']['content_type'];
+	foreach($types as $type){
+		if($type)
+		$result[]=array('item_type'=>$type);
+	}
+	qtr_update_itemtype($result);
+	drupal_set_message(t('The settings have been saved. '));
+}
+
 function qtr_settings($form, &$form_state) {
+	
   $form['params'] = array(
     '#type' => 'fieldset',
     '#title' => t('Parameters'),
@@ -48,23 +97,16 @@ function qtr_settings($form, &$form_state) {
     '#default_value' => variable_get('qtr_delta', 0.00000000001),
   );
 
-  $form['params']['qtr_w_upload'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Weight of upload action'),
-    '#default_value' => variable_get('qtr_w_upload', 1.0),
-  );
-
-  $form['params']['qtr_w_download'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Weight of download action'),
-    '#default_value' => variable_get('qtr_w_download', 0.1),
-  );
-
-  $form['params']['qtr_w_view'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Weight of view action'),
-    '#default_value' => variable_get('qtr_w_view', 0.05),
-  );
+  $actions=qtr_get_actiontype();
+  if($actions){
+  	foreach($actions as $action){
+  		 $form['params']['qtr_w_'.$action->action] = array(
+    		'#type' => 'textfield',
+    		'#title' => t('Weight of %action action', array('%action'=>$action->action)),
+    		'#default_value' => $action->weight,
+  		);
+  	}
+  }
 
   $form['params']['qtr_decay'] = array(
     '#type' => 'select',
@@ -115,7 +157,32 @@ function qtr_settings($form, &$form_state) {
     '#default_value' => variable_get('qtr_resc_t', 0),
   );
 
-  return system_settings_form($form);
+  $form['submit']=array(
+    	'#type'=>'submit',
+    	'#value'=>t('Save'),
+    );
+    return $form;
+}
+
+function qtr_settings_submit($form, &$form_state) {
+	$params=$form_state['values'];
+	variable_set('qtr_delta', $params['qtr_delta']);
+	variable_set('qtr_decay', $params['qtr_decay']);
+	variable_set('qtr_tau0', $params['qtr_tau0']);
+	variable_set('qtr_renorm_q', $params['qtr_renorm_q']);
+	variable_set('qtr_renorm_r', $params['qtr_renorm_r']);
+	variable_set('qtr_renorm_t', $params['qtr_renorm_t']);
+	variable_set('qtr_resc_q', $params['qtr_resc_q']);
+	variable_set('qtr_resc_r', $params['qtr_resc_t']);
+	variable_set('qtr_resc_t', $params['qtr_resc_t']);
+	$actions=qtr_get_actiontype();
+  	if($actions){
+  		foreach($actions as $action){
+  			qtr_update_actionweight($action->action,$params['qtr_w_'.$action->action]);
+  		}
+  	}
+  	drupal_set_message(t('The settings have been saved. '));
+	
 }
 
 function qtr_demo() {

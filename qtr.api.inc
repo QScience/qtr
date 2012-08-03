@@ -78,13 +78,33 @@ function qtr_get_values($entity_type, $id = NULL) {
 
 /**
  * 
- * Enter description here ...
- * @param {mixed} $type The node type 
+ * add item types to qtr_item_types table
+ * @param {mixed} $types The node types
  */
-function qtr_add_nodetype($type = NULL) {
-	if (is_null($type)) return FALSE;
-	
-	
+function qtr_update_itemtype($types = array()) {
+	//delete current item types
+	$del = db_delete('qtr_item_types')->execute();
+	//add new item types
+	foreach($types as $type){
+		$type+= array( 'reference_table' => 'node',);
+		db_insert('qtr_item_types')->fields(array('item_type' => $type['item_type'], 'reference_table' => $type['reference_table']))->execute();	
+	}
+}
+/**
+ * 
+ * get item types from qtr_item_types table
+ */
+function qtr_get_itemtype() {
+	$query = db_select('qtr_item_types', 'q');
+  	$result = $query->fields('q')
+                  ->execute()
+                  ->fetchAll();
+    if (!empty($result)) {
+    	return $result;
+  	}
+  	else {
+    	return FALSE;
+  	}
 }
 
 // QTR ADD ACTION TYPE
@@ -94,13 +114,39 @@ function qtr_add_nodetype($type = NULL) {
  * 
  * Enter description here ...
  * @param {mixed} $type The action type to create
+ * @param {mixed} $weight The action type to create
  * @param {mixed} $description The description associated to the action
  */
-function qtr_add_actiontype($type = NULL, $description = NULL) {
+function qtr_add_actiontype($type = NULL, $weight=0, $description = NULL) {
 	if (is_null($type)) return;
-	
-	
+	else{
+		db_insert('qtr_action_types')->fields(array('action' => $type, 'weight' => $weight, 'description'=>$description))->execute();
+	}
 }
+/**
+ * 
+ * get action types from qtr_action_types table
+ */
+function qtr_get_actiontype() {
+	$query = db_select('qtr_action_types', 'q');
+  	$result = $query->fields('q')
+                  ->execute()
+                  ->fetchAll();
+    if (!empty($result)) {
+    	return $result;
+  	}
+  	else {
+    	return FALSE;
+  	}
+}
+/**
+ * 
+ * update action weight
+ */
+function qtr_update_actionweight($action, $weight) {
+	 db_query("UPDATE {qtr_action_types} SET weight = :weight WHERE action = :action", array('weight'=>$weight,'action'=>$action));
+}
+
 
 
 // 
