@@ -11,26 +11,52 @@
  * Writes a a new record in the QTR table
  * 
  * @param {mixed} $uid The user id from the users table
- * @param {mixed} $iid The item id
+ * @param {mixed} $nid The item id
  * @param {mixed} $action The type of action
  * @param {mixed} $time Optional. The timestamp associated with 
  *   the action. Defaults, now()
  */
-function qtr_write_action($uid, $iid, $action, $time = NULL) {
-	// TODO
+function qtr_write_action($uid, $nid, $aid, $time = REQUEST_TIME) {
+	//check $uid
+	if(!user_load($uid)){
+		return false;
+	}
+	//check $nid
+	if(!node_load($nid)){
+		return false;
+	}
+	//check $aid
+	if(!qtr_get_actiontype($aid)){
+		return false;
+	}
+	$query= db_select('qtr_actions', 'q');
+
+	$result = $query->fields('q')
+				->condition('uid', $uid)
+				->condition('nid', $nid)
+				->condition('action_type', $aid)
+                ->execute()
+                ->fetchCol();
+	if(!$result){
+		db_insert('qtr_actions')
+      ->fields(array(
+        'uid' => $uid,
+        'nid' => $nid,
+        'action_type' => $aid,
+        'timestamp' => $time,
+      ))
+      ->execute();
+	}
+	 
 }
 
 /**
- * Writes the values of the computation of QTR for a specific
- * entity type
+ * Writes the values of the computation of QTR for 
  * 
- * @param {mixed} $uid The user id from the users table
- * @param {mixed} $iid The item id
- * @param {mixed} $action The type of action
- * @param {mixed} $time Optional. The timestamp associated with 
- *   the action. Defaults, now()
+ * @param {mixed} $table The table to insert the date
+ * @param {mixed} $values the array of values to insert
  */
-function qtr_write_values($table, $ids = array(), $values) {
+function qtr_write_values($table, $values) {
 	// TODO
 }
 
@@ -39,9 +65,6 @@ function qtr_write_values($table, $ids = array(), $values) {
 /**
  * Retrieves sets of actions from the QTR table
  * 
- * @param $uid {mixed} Optional. If passed, returns the
- * 	actions only for the specified user id
- * @return $actions {Array|Boolean} The array of actions, or 
  * 	FALSE if 
  */
 function qtr_get_actions() {
@@ -127,11 +150,19 @@ function qtr_add_actiontype($type = NULL, $weight=0, $description = NULL) {
  * 
  * get action types from qtr_action_types table
  */
-function qtr_get_actiontype() {
+function qtr_get_actiontype($aid=null) {
 	$query = db_select('qtr_action_types', 'q');
-  	$result = $query->fields('q')
+	if($aid==null){
+		$result = $query->fields('q')
                   ->execute()
                   ->fetchAll();
+	}else{
+		$result = $query->fields('q')
+				->condition('id', $aid)
+                  ->execute()
+                  ->fetchCol();
+	}
+  	
     if (!empty($result)) {
     	return $result;
   	}
@@ -147,6 +178,30 @@ function qtr_update_actionweight($action, $weight) {
 	 db_query("UPDATE {qtr_action_types} SET weight = :weight WHERE action = :action", array('weight'=>$weight,'action'=>$action));
 }
 
+/**
+ * Implements hook_exit().
+ *
+ * This is where actions are gathered on page accesses.
+ */
+function qtr_exit(){
+    global $user;
+    $uid=$user->uid;
 
-
-// 
+  	drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
+  	drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+  
+    // For anonymous users unicode.inc will not have been loaded.
+    include_once DRUPAL_ROOT . '/includes/unicode.inc';
+    // Log this page access.
+    $nid='';
+    $aid='';
+    if (arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == NULL) {
+    	$nid=arg(1);$aid=3;
+    }else if(arg(0) == 'paper'&&arg(1) == 'download'&&is_numeric(arg(2))){
+    	$nid=arg(2);$aid=2;
+    }else if(arg(0) == 'plus1'&&arg(1) == 'vote'&&arg(2) == 'node'&&is_numeric(arg(3))){
+    	$nid=arg(3);$aid=1;
+    }
+    
+    qtr_write_action($uid, $nid, $aid);
+}

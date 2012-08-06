@@ -283,9 +283,9 @@ function qtr_block_view($delta = ''){
     foreach($showlist as $list){
             $contents .= '<li><a href="node/'.$list->nid.'" target="_blank">'.$list->title."</a></li>";
     }
-     $contents .= '</ul></div>';
-     $blocks['content'] = $contents;
-     return $blocks;
+    $contents .= '</ul></div>';
+    $blocks['content'] = $contents;
+    return $blocks;
   }
     
     
