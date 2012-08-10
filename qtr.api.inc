@@ -179,6 +179,29 @@ function qtr_update_actionweight($action, $weight) {
 }
 
 /**
+ * 
+ * get top items
+ * @param {mixed} $num The number of returned items
+ * 
+ */
+function qtr_get_topquality($num){
+	 $showlist=array();$count=0;
+	 $types=array();
+	 foreach (node_type_get_types() as $type => $type_obj) {
+      if(variable_get('popular_block_'.$type,0)){
+        $types[]=$type;
+      }
+    }
+    if(count($types)==0){
+    	return false;
+    }
+	 
+	 $sql='SELECT n.nid,n.title FROM {qtr_quality} AS q INNER JOIN {node} as n ON q.nid=n.nid and n.type IN '.$types.' ORDER BY q.quality DESC LIMIT '.$num;
+	$result=db_query($sql)->fetchAll();
+	return $result;
+}
+
+/**
  * Implements hook_exit().
  *
  * This is where actions are gathered on page accesses.

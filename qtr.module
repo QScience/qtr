@@ -258,32 +258,17 @@ function qtr_block_save($delta, $edit = array()) {
  */
 function qtr_block_view($delta = ''){
   if($delta == 'popular'){
-      $node_rep = drupal_get_path('module', 'qtr') . "/item_file"; 
-      $showlist=array();$count=0;
-      if(file_exists($node_rep)){
-       $ifs = file($node_rep);
-        foreach ($ifs as $line) {
-          $words = explode("\t", $line);
-          $i = (int) $words[0];
-          $node=node_load($i);
-          $isselect=0;
-          if($node){
-            $isselect=variable_get('popular_block_'.$node->type,0);
-          }
-          if($isselect){
-            $showlist[]=$node;
-            $count++;
-          }
-          if($count>=5||$words[1]==0)
-              break;
-        }
-    }
+    $showlist=qtr_get_topquality(5);
     $blocks['subject'] = 'Popular content';
-    $contents = '<div class="item-list"><ul>';
-    foreach($showlist as $list){
+    $contents = '<ul>';
+    if($showlist){
+    	foreach($showlist as $list){
             $contents .= '<li><a href="node/'.$list->nid.'" target="_blank">'.$list->title."</a></li>";
+    	}
+    }else{
+    	$contents .='No polular content yet.';
     }
-    $contents .= '</ul></div>';
+    $contents .= '</ul>';
     $blocks['content'] = $contents;
     return $blocks;
   }
