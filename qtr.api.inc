@@ -69,6 +69,7 @@ function qtr_write_values($table, $values) {
  */
 function qtr_get_actions() {
 	// TODO
+        $actions = db_query("SELECT a.uid, a.nid, at.action, a.timestamp, at.weight FROM {qtr_actions} AS a LEFT JOIN {qtr_action_types} AS at ON at.id=a.action_type");
 	return $actions;
 }
 

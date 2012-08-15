@@ -53,7 +53,7 @@ function _qtr_init(&$agent, &$item, $agent_num, $item_num) {
 
 }
 
-function _qtr_read(&$agent, &$item, $user_item_file, $trust) {
+function _qtr_read(&$agent, &$item, $trust) {
   // $trust is for explicit trust.
 
   /* reading input file for user-item interactions */
@@ -61,28 +61,16 @@ function _qtr_read(&$agent, &$item, $user_item_file, $trust) {
    * (eventually, \t kind of object) */
   // N.B.: the time units are decided here; set variables in lines 27 and 38
   // accordingly
-  $ifs = file($user_item_file);
-  foreach ($ifs as $line) {
-    $words = explode("\t", $line);
-    $i = (int) $words[0];
-    $a = (int) $words[1];
-    $rating = (string) $words[2];
-    $time = (int) $words[3];
+  $actions = qtr_get_actions();
+  foreach ($actions as $action) {
+    $i = (int) $action->uid;
+    $a = (int) $action->nid;
+    $rating = (string) $action->action;
+    $time = (int) $action->timestamp;
+    $rw = $action->weight;
     if (!in_array($a, $agent[$i]['collection'])) { // this is to avoid duplicates; it is possible to remove this control
       $item[$a]['reader'][] = $i; $agent[$i]['collection'][] = $a;
       $item[$a]['r_time'][] = $time; $agent[$i]['c_time'][] = $time;
-      // follows the way weights are expressed.
-      switch ($rating) {
-      case "vote":
-        $rw = variable_get('qtr_w_vote', 1.0);
-        break;
-      case "D":
-        $rw = variable_get('qtr_w_download', 0.1);
-        break;
-      case "V":
-        $rw = variable_get('qtr_w_view', 0.05);
-        break;
-      }
       $item[$a]['r_weight'][] = $rw;
       $agent[$i]['c_weight'][] = $rw;
     }
