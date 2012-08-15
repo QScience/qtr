@@ -64,14 +64,15 @@ function qtr_write_values($table, $values) {
 
 /**
  * Retrieves sets of actions from the QTR table
- * 
+ *
  * 	FALSE if 
  */
 function qtr_get_actions() {
 
 //use join search from qtr_action and qtr_action_types to get action and weight values directly 
         $actions = db_query("SELECT a.uid, a.nid, at.action, a.timestamp, at.weight 
-                   FROM {qtr_actions} AS a LEFT JOIN {qtr_action_types} AS at ON at.id=a.action_type");
+                   FROM {qtr_actions} AS a LEFT JOIN {qtr_action_types} AS at ON at.id=a.action_type 
+                   INNER JOIN {node} AS n ON n.nid=a.nid where n.type IN (select item_type from {qtr_item_types})")->fetchALL();
 	return $actions;
 }
 
