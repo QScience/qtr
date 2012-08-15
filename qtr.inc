@@ -182,7 +182,8 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
   }
   //print_r($agent);
   // TODO save the values to the database
-  // qtr_write_values($table, $ids = array(), $values) {
+  qtr_write_values('qtr_reputation', $agent);
+  qtr_write_values('qtr_quality', $item);
   
 }
 

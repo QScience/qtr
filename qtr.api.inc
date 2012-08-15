@@ -58,6 +58,31 @@ function qtr_write_action($uid, $nid, $aid, $time = REQUEST_TIME) {
  */
 function qtr_write_values($table, $values) {
 	// TODO
+        switch($table){
+            case "qtr_reputation":
+                    foreach($values as $id => $value){
+                        $sql = "";
+                        db_insert('qtr_reputation')
+                                    ->fields(array(
+                                        'uid'        => $id,
+                                        'rank'       => $value['rank'],
+                                        'reputation' => $value['reputation']
+                                    ))
+                                   ->execute();
+                    }
+                    break;
+            case "qtr_quality":
+                    foreach($values as $id => $value){
+                            db_insert('qtr_quality')
+                                    ->fields(array(
+                                        'nid'        => $id,
+                                        'quality' => $value['quality']
+                                    ))
+                                   ->execute();
+                    }
+                    break;
+                
+        }
 }
 
 // GET ACTIONS
