@@ -61,11 +61,12 @@ function _qtr_read(&$agent, &$item, $trust) {
    * (eventually, \t kind of object) */
   // N.B.: the time units are decided here; set variables in lines 27 and 38
   // accordingly
+
   $actions = qtr_get_actions();
   foreach ($actions as $action) {
     $i = (int) $action->uid;
     $a = (int) $action->nid;
-    $rating = (string) $action->action;
+//    $rating = (string) $action->action;
     $time = (int) $action->timestamp;
     $rw = $action->weight;
     if (!in_array($a, $agent[$i]['collection'])) { // this is to avoid duplicates; it is possible to remove this control
@@ -184,6 +185,5 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
   // TODO save the values to the database
   qtr_write_values('qtr_reputation', $agent);
   qtr_write_values('qtr_quality', $item);
-  
 }
 
