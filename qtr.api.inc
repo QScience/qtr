@@ -58,19 +58,26 @@ function qtr_write_action($uid, $nid, $aid, $time = REQUEST_TIME) {
  */
 function qtr_write_values($table, $values) {
 	// TODO
+        if($table == "qtr_reputation"){
+                $sorted_values = array();
+                for ($i = 0; $i < count($values); $i++) {
+                        $sorted_values += array ($i => $values[$i]['reputation']);
+                }
+                arsort($sorted_values);
+        }
         switch($table){
-            case "qtr_reputation":
-                    foreach($values as $id => $value){
-                        $sql = "";
-                        db_insert('qtr_reputation')
+                case "qtr_reputation":
+                        foreach($sorted_values as $id => $value){
+                                $sql = "";
+                                db_insert('qtr_reputation')
                                     ->fields(array(
                                         'uid'        => $id,
                                         'rank'       => $value['rank'],
                                         'reputation' => $value['reputation']
                                     ))
                                    ->execute();
-                    }
-                    break;
+                        }
+                        break;
             case "qtr_quality":
                     foreach($values as $id => $value){
                             db_insert('qtr_quality')

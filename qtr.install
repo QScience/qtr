@@ -118,7 +118,13 @@ function qtr_schema() {
 		  'reputation' => array(
 		  	'type' => 'float',
 		    'unsigned' => TRUE,
-        'not null' => TRUE,
+                    'not null' => TRUE,
+		    'description' => 'The description of the QTR action',
+			),
+                 'rank' => array(
+		  	'type' => 'int',
+		    'unsigned' => TRUE,
+                    'not null' => TRUE,
 		    'description' => 'The description of the QTR action',
 			),
 	 ),
