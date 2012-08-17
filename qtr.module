@@ -6,12 +6,12 @@ require_once 'qtr.api.inc';
 function qtr_menu() {
   $items = array();
 
-/*  $items['qtr/demo'] = array(
+ $items['qtr/demo'] = array(
     'title' => 'QTR demonstration',
     'description' => 'Running QTR on sample data',
     'page callback' => 'qtr_demo',
-    'access arguments' => array('access QTR demonstration'),
-  );*/
+    'access arguments' => array('administer QTR'),
+  );
 
   $items['admin/config/user-interface/qtr'] = array(
     'title' => 'QTR',
