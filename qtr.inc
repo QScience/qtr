@@ -113,6 +113,7 @@ function _qtr_read(&$agent, &$item, $trust) {
         }
     }
 }
+}
 
 function _qtr_decay($tau) {
     $tau0 = variable_get('qtr_tau0', 50);
@@ -217,5 +218,6 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
  // qtr_write_values('qtr_reputation', $agent);
  // qtr_write_values('qtr_quality', $item);
    drupal_set_message(t('QTR run successfully!'));
+
 }
 

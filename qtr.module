@@ -301,11 +301,7 @@ function qtr_block_view($delta = '') {
         $contents .= '</ul>';
         $blocks['content'] = $contents;
         return $blocks;
-    }
-    $contents .= '</ul>';
-    $blocks['content'] = $contents;
-    return $blocks;
-  }   
+    }  
 }
 
 
