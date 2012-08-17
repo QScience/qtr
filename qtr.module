@@ -6,24 +6,32 @@ require_once 'qtr.api.inc';
 function qtr_menu() {
   $items = array();
 
- $items['qtr/demo'] = array(
+
+/* $items['qtr/demo'] = array(
     'title' => 'QTR demonstration',
     'description' => 'Running QTR on sample data',
     'page callback' => 'qtr_demo',
     'access arguments' => array('administer QTR'),
-  );
+  );*/
 
   $items['admin/config/user-interface/qtr'] = array(
     'title' => 'QTR',
     'description' => 'QTR settings',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('qtr_settings'),
+    'page arguments' => array('qtr_run_form'),
     'access arguments' => array('administer QTR'),
+  );
+   $items['admin/config/user-interface/qtr/run'] = array(
+    'title' => 'Run',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight'=>-10
   );
   $items['admin/config/user-interface/qtr/Parameters'] = array(
     'title' => 'Parameters',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
+     'page callback' => 'drupal_get_form',
+    'page arguments' => array('qtr_settings'),
+    'access arguments' => array('administer QTR'),
+     'type' => MENU_LOCAL_TASK,
   );
   $items['admin/config/user-interface/qtr/item'] = array(
     'title' => 'Item',
@@ -44,6 +52,19 @@ function qtr_permission() {
   //  'access QTR demonstration' => array('title' => t('Access QTR demonstration')),
     'administer QTR' => array('title' => t('Administer QTR')),
   );
+}
+
+function qtr_run_form($form, &$form_state){
+	$form['description'] = array(
+    	'#markup' => '<p>' . t('You can specify !cron frequency to run the QTR. Click the button run now: ', 
+    	array('!cron' => l('cron', 'admin/config/system/cron'))) . '</p>',
+  	);
+  $form['run'] = array(
+    '#type' => 'submit',
+    '#value' => t('Run recommender'),
+    '#submit' => array('qtr_demo'),
+  );
+    return $form;	
 }
 
 function qtr_set_form($form, &$form_state){
@@ -186,21 +207,25 @@ function qtr_settings_submit($form, &$form_state) {
 }
 
 function qtr_demo() {
-  qtr_from_file(drupal_get_path('module', 'qtr') . '/EF_complete_new.dat');
+  qtr_from_db();
   return '';
 }
 
-function qtr_from_file($user_item, $trust = NULL) {
+function qtr_from_db($trust = NULL) {
   $agent = $item = NULL;
-  _qtr_init($agent, $item, 50, 1000);
-  _qtr_read($agent, $item, $user_item, $trust);
-  _qtr_calculate($agent, $item, $trust, 695);
+ // _qtr_init($agent, $item, 50, 1000);
+  _qtr_read($agent, $item, $trust);
+  if(count($agent)&&count($item)){
+  	 _qtr_calculate($agent, $item, $trust, 695);
+  }
   
   //write the result of reputation of user and quality of paper into files
-  $path_agents = drupal_get_path('module', 'qtr') . "/agent_file";
-  $path_items = drupal_get_path('module', 'qtr') . "/item_file";
+  //$path_agents = drupal_get_path('module', 'qtr') . "/agent_file";
+  //$path_items = drupal_get_path('module', 'qtr') . "/item_file";
   
-  _qtr_save($agent, $item, $path_agents,$path_items);
+  //_qtr_save($agent, $item, $path_agents,$path_items);
+  qtr_write_values('qtr_reputation', $agent);
+  qtr_write_values('qtr_quality', $item);
 }
 
 /*
@@ -271,8 +296,17 @@ function qtr_block_view($delta = ''){
     $contents .= '</ul>';
     $blocks['content'] = $contents;
     return $blocks;
-  }
-    
-    
+  }   
+}
+
+
+/*
+ * Implements hook_cron
+ * 
+ * Automatically run QTR
+ */
+
+function qtr_cron() {
+    qtr_demo();
 }
 
