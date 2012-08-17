@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Private QTR settings and functions.
@@ -35,39 +36,38 @@
 
 /*function _qtr_init(&$agent, &$item, $agent_num, $item_num) {
 
-  $agent = array_fill(0, $agent_num, array(
-    'reputation' => 0.0, // reputation value
-    'r_tmp' => 0.0,
-    'collection' => array(), // ID of items the user has interacted with
-    'c_time' => array(), // time when user interacted with an item
-    'c_weight' => array(), // weight associated to the interaction
-    'neighbor' => array(), // ID of trusted fellows of the users
-    't_exp' => array() // amount of trust
-  ));
+    $agent = array_fill(0, $agent_num, array(
+        'reputation' => 0.0, // reputation value
+        'r_tmp' => 0.0,
+        'collection' => array(), // ID of items the user has interacted with
+        'c_time' => array(), // time when user interacted with an item
+        'c_weight' => array(), // weight associated to the interaction
+        'neighbor' => array(), // ID of trusted fellows of the users
+        't_exp' => array() // amount of trust
+            ));
 
-  $item = array_fill(0, $item_num, array(
-    'quality' => 0.0, // quality value
-    'q_tmp' => 0.0,
-    'reader' => array(), // ID of users who interacted with item
-    'r_time' => array(), // time when an user interacted with item
-    'r_weight' => array() // weight associated to the interaction
-  ));
-
+    $item = array_fill(0, $item_num, array(
+        'quality' => 0.0, // quality value
+        'q_tmp' => 0.0,
+        'reader' => array(), // ID of users who interacted with item
+        'r_time' => array(), // time when an user interacted with item
+        'r_weight' => array() // weight associated to the interaction
+            ));
 }*/
 
 function _qtr_read(&$agent, &$item, $trust) {
-  // $trust is for explicit trust.
+    // $trust is for explicit trust.
 
-  /* reading input file for user-item interactions */
-  /* FORMAT: userID \t itemID \t interaction_type \t interaction_time
-   * (eventually, \t kind of object) */
-  // N.B.: the time units are decided here; set variables in lines 27 and 38
-  // accordingly
+    /* reading input file for user-item interactions */
+    /* FORMAT: userID \t itemID \t interaction_type \t interaction_time
+     * (eventually, \t kind of object) */
+    // N.B.: the time units are decided here; set variables in lines 27 and 38
+    // accordingly
 
-  $actions = qtr_get_actions();
-  foreach ($actions as $action) {
-    $i = (int) $action->uid;
-    $a = (int) $action->nid;
+    $actions = qtr_get_actions();
+    foreach ($actions as $action) {
+        $i = (int) $action->uid;
+        $a = (int) $action->nid;
 //    $rating = (string) $action->action;
     $time = (int) $action->timestamp;
     $rw = $action->weight;
@@ -100,33 +100,32 @@ function _qtr_read(&$agent, &$item, $trust) {
       $item[$a]['r_weight'][] = $rw;
       $agent[$i]['c_weight'][] = $rw;
     }
-  }
-  /* now if $trust is not NULL, reading input file for trust relationships */
-  /* FORMAT: userID \t ID_of_user_trusted_by_i \t amount_of_trust */
-  if ($trust !== NULL) {
-    $results = db_query("SELECT * FROM {qtr_trust}");
-    foreach ($results as $result) {
-      $i = (int) $result->uid1;
-      $j = (int) $result->uid2;
-      $tt = (double) $result->trust;
-      $agent[$i]['neighbor'][] = $j;
-      $agent[$i]['t_exp'][] = $tt;
+    /* now if $trust is not NULL, reading input file for trust relationships */
+    /* FORMAT: userID \t ID_of_user_trusted_by_i \t amount_of_trust */
+    if ($trust !== NULL) {
+        $results = db_query("SELECT * FROM {qtr_trust}");
+        foreach ($results as $result) {
+            $i = (int) $result->uid1;
+            $j = (int) $result->uid2;
+            $tt = (double) $result->trust;
+            $agent[$i]['neighbor'][] = $j;
+            $agent[$i]['t_exp'][] = $tt;
+        }
     }
-  }
 }
 
 function _qtr_decay($tau) {
-  $tau0 = variable_get('qtr_tau0', 50);
-  switch (variable_get('qtr_decay', 0)) {
-  case 1:
-    return pow(1. + ((double)$tau) / $tau0, -1);
-  case 2:
-    return exp(-((double)$tau) / $tau0);
-  case 3:
-    return $tau <= $tau0 ? 1.0 : 0.0;
-  default:
-    return 1.0;
-  }
+    $tau0 = variable_get('qtr_tau0', 50);
+    switch (variable_get('qtr_decay', 0)) {
+        case 1:
+            return pow(1. + ((double) $tau) / $tau0, -1);
+        case 2:
+            return exp(-((double) $tau) / $tau0);
+        case 3:
+            return $tau <= $tau0 ? 1.0 : 0.0;
+        default:
+            return 1.0;
+    }
 }
 
 function _qtr_calculate(&$agent, &$item, $trust, $start) {

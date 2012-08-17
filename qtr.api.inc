@@ -1,12 +1,10 @@
 <?php
 
-
 /**
  * @file
  * 
  * Api to write and access QTR data and the database
  */
-
 // WRITE
 
 /**
@@ -107,21 +105,22 @@ function qtr_get_actions() {
 			                   FROM {qtr_actions} AS a LEFT JOIN {qtr_action_types} AS at ON at.id=a.action_type 
 			                   INNER JOIN {node} AS n ON n.nid=a.nid where n.type IN (select item_type from {qtr_item_types})")->fetchALL();
 	return $actions;
+
 }
 
 function qtr_get_actions_by_user() {
-	// TODO
-	return $actions;
+    // TODO
+    return $actions;
 }
 
 function qtr_get_actions_by_action_type($action_type = NULL) {
-	// TODO
-	return $actions;
+    // TODO
+    return $actions;
 }
 
 function qtr_get_actions_by_entity_type($entity_type = NULL) {
-	// TODO
-	return $actions;
+    // TODO
+    return $actions;
 }
 
 /* GET VALUES
@@ -170,6 +169,7 @@ function qtr_update_itemtype($types = array ()) {
 		))->execute();
 	}
 }
+
 /**
  * 
  * get item types from qtr_item_types table
@@ -203,25 +203,34 @@ function qtr_add_actiontype($type = NULL, $weight = 0, $description = NULL) {
 			'description' => $description
 		))->execute();
 	}
+
 }
+
 /**
  * 
  * get action types from qtr_action_types table
  */
 function qtr_get_actiontype($aid = null) {
-	$query = db_select('qtr_action_types', 'q');
-	if ($aid == null) {
-		$result = $query->fields('q')->execute()->fetchAll();
-	} else {
-		$result = $query->fields('q')->condition('id', $aid)->execute()->fetchCol();
-	}
 
-	if (!empty ($result)) {
-		return $result;
-	} else {
-		return FALSE;
-	}
+    $query = db_select('qtr_action_types', 'q');
+    if ($aid == null) {
+        $result = $query->fields('q')
+                ->execute()
+                ->fetchAll();
+    } else {
+        $result = $query->fields('q')
+                ->condition('id', $aid)
+                ->execute()
+                ->fetchCol();
+    }
+
+    if (!empty($result)) {
+        return $result;
+    } else {
+        return FALSE;
+    }
 }
+
 /**
  * 
  * update action weight
@@ -231,6 +240,7 @@ function qtr_update_actionweight($action, $weight) {
 		'weight' => $weight,
 		'action' => $action
 	));
+
 }
 
 /**
@@ -240,21 +250,22 @@ function qtr_update_actionweight($action, $weight) {
  * 
  */
 function qtr_get_topquality($num) {
-	$showlist = array ();
-	$count = 0;
-	$types = array ();
-	foreach (node_type_get_types() as $type => $type_obj) {
-		if (variable_get('popular_block_' . $type, 0)) {
-			$types[] = $type;
-		}
-	}
-	if (count($types) == 0) {
-		return false;
-	}
 
-	$sql = 'SELECT n.nid,n.title FROM {qtr_quality} AS q INNER JOIN {node} as n ON q.nid=n.nid and n.type IN ' . $types . ' ORDER BY q.quality DESC LIMIT ' . $num;
-	$result = db_query($sql)->fetchAll();
-	return $result;
+    $showlist = array();
+    $count = 0;
+    $types = array();
+    foreach (node_type_get_types() as $type => $type_obj) {
+        if (variable_get('popular_block_' . $type, 0)) {
+            $types[] = $type;
+        }
+    }
+    if (count($types) == 0) {
+        return false;
+    }
+
+    $sql = 'SELECT n.nid,n.title FROM {qtr_quality} AS q INNER JOIN {node} as n ON q.nid=n.nid and n.type IN ' . $types . ' ORDER BY q.quality DESC LIMIT ' . $num;
+    $result = db_query($sql)->fetchAll();
+    return $result;
 }
 
 /**
@@ -289,3 +300,4 @@ function qtr_exit() {
 
 	qtr_write_action($uid, $nid, $aid);
 }
+
