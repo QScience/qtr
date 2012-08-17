@@ -4,211 +4,212 @@ require_once 'qtr.inc';
 require_once 'qtr.api.inc';
 
 function qtr_menu() {
-  $items = array();
+    $items = array();
 
-  $items['qtr/demo'] = array(
-    'title' => 'QTR demonstration',
-    'description' => 'Running QTR on sample data',
-    'page callback' => 'qtr_demo',
-    'access arguments' => array('access QTR demonstration'),
-  );
+    $items['qtr/demo'] = array(
+        'title' => 'QTR demonstration',
+        'description' => 'Running QTR on sample data',
+        'page callback' => 'qtr_demo',
+        'access arguments' => array('access QTR demonstration'),
+    );
 
-  $items['admin/config/user-interface/qtr'] = array(
-    'title' => 'QTR',
-    'description' => 'QTR settings',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('qtr_settings'),
-    'access arguments' => array('administer QTR'),
-  );
-  $items['admin/config/user-interface/qtr/Parameters'] = array(
-    'title' => 'Parameters',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items['admin/config/user-interface/qtr/item'] = array(
-    'title' => 'Item',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('qtr_set_form'),
-    'access arguments' => array('administer QTR'),
-    'type' => MENU_LOCAL_TASK,
-  );
+    $items['admin/config/user-interface/qtr'] = array(
+        'title' => 'QTR',
+        'description' => 'QTR settings',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('qtr_settings'),
+        'access arguments' => array('administer QTR'),
+    );
+    $items['admin/config/user-interface/qtr/Parameters'] = array(
+        'title' => 'Parameters',
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'weight' => -10,
+    );
+    $items['admin/config/user-interface/qtr/item'] = array(
+        'title' => 'Item',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('qtr_set_form'),
+        'access arguments' => array('administer QTR'),
+        'type' => MENU_LOCAL_TASK,
+    );
 
-  return $items;
+    return $items;
 }
 
 /**
  * Implements hook_permission().
  */
 function qtr_permission() {
-  return array(
-  //  'access QTR demonstration' => array('title' => t('Access QTR demonstration')),
-    'administer QTR' => array('title' => t('Administer QTR')),
-  );
+    return array(
+        //  'access QTR demonstration' => array('title' => t('Access QTR demonstration')),
+        'administer QTR' => array('title' => t('Administer QTR')),
+    );
 }
 
-function qtr_set_form($form, &$form_state){
-	$form= array();
-	$posttype = array ();$default = array();
-	$types=qtr_get_itemtype();
-	if($types){
-		foreach($types as $type){
-			$default[]=$type->item_type;
-		}
-	}
+function qtr_set_form($form, &$form_state) {
+    $form = array();
+    $posttype = array();
+    $default = array();
+    $types = qtr_get_itemtype();
+    if ($types) {
+        foreach ($types as $type) {
+            $default[] = $type->item_type;
+        }
+    }
     foreach (node_type_get_types() as $type => $type_obj) {
-            $posttype[$type] = $type_obj->name;
+        $posttype[$type] = $type_obj->name;
     }
     $form['content_type'] = array(
-      '#type' => 'checkboxes', 
-      '#title' => t('Content type to be considered: '), 
-      '#options' => $posttype,
-      '#default_value' => $default,
+        '#type' => 'checkboxes',
+        '#title' => t('Content type to be considered: '),
+        '#options' => $posttype,
+        '#default_value' => $default,
     );
-    $form['submit']=array(
-    	'#type'=>'submit',
-    	'#value'=>t('Save'),
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save'),
     );
-    return $form;	
+    return $form;
 }
-function qtr_set_form_submit($form, &$form_state){
-	$result=array();
-	$types=$form_state['values']['content_type'];
-	foreach($types as $type){
-		if($type)
-		$result[]=array('item_type'=>$type);
-	}
-	qtr_update_itemtype($result);
-	drupal_set_message(t('The settings have been saved. '));
+
+function qtr_set_form_submit($form, &$form_state) {
+    $result = array();
+    $types = $form_state['values']['content_type'];
+    foreach ($types as $type) {
+        if ($type)
+            $result[] = array('item_type' => $type);
+    }
+    qtr_update_itemtype($result);
+    drupal_set_message(t('The settings have been saved. '));
 }
 
 function qtr_settings($form, &$form_state) {
-	
-  $form['params'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Parameters'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-  );
 
-  $form['params']['qtr_delta'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Delta'),
-    '#description' => t('N.B.: if the effective number of AGENTS/ITEMS is lower (i.e. if there are gaps in the input file), the renormalization of the algorithm has to change. Better to have no gaps!'),
-    '#default_value' => variable_get('qtr_delta', 0.00000000001),
-  );
+    $form['params'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Parameters'),
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+    );
 
-  $actions=qtr_get_actiontype();
-  if($actions){
-  	foreach($actions as $action){
-  		 $form['params']['qtr_w_'.$action->action] = array(
-    		'#type' => 'textfield',
-    		'#title' => t('Weight of %action action', array('%action'=>$action->action)),
-    		'#default_value' => $action->weight,
-  		);
-  	}
-  }
+    $form['params']['qtr_delta'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Delta'),
+        '#description' => t('N.B.: if the effective number of AGENTS/ITEMS is lower (i.e. if there are gaps in the input file), the renormalization of the algorithm has to change. Better to have no gaps!'),
+        '#default_value' => variable_get('qtr_delta', 0.00000000001),
+    );
 
-  $form['params']['qtr_decay'] = array(
-    '#type' => 'select',
-    '#title' => t('Time-decay of scores'),
-    '#options' => array(0 => 'no decay', 1 => 'power-decay', 2 => 'exponential decay', 3 => 'theta-decay'),
-    '#default_value' => variable_get('qtr_decay', 0),
-  );
+    $actions = qtr_get_actiontype();
+    if ($actions) {
+        foreach ($actions as $action) {
+            $form['params']['qtr_w_' . $action->action] = array(
+                '#type' => 'textfield',
+                '#title' => t('Weight of %action action', array('%action' => $action->action)),
+                '#default_value' => $action->weight,
+            );
+        }
+    }
 
-  $form['params']['qtr_tau0'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Time scale of the decay'),
-    '#default_value' => variable_get('qtr_tau0', 50),
-  );
+    $form['params']['qtr_decay'] = array(
+        '#type' => 'select',
+        '#title' => t('Time-decay of scores'),
+        '#options' => array(0 => 'no decay', 1 => 'power-decay', 2 => 'exponential decay', 3 => 'theta-decay'),
+        '#default_value' => variable_get('qtr_decay', 0),
+    );
 
-  $form['params']['qtr_renorm_q'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Renormalization of quality'),
-    '#default_value' => variable_get('qtr_renorm_q', 0),
-  );
+    $form['params']['qtr_tau0'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Time scale of the decay'),
+        '#default_value' => variable_get('qtr_tau0', 50),
+    );
 
-  $form['params']['qtr_renorm_r'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Renormalization of reputation'),
-    '#default_value' => variable_get('qtr_renorm_r', 0),
-  );
+    $form['params']['qtr_renorm_q'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Renormalization of quality'),
+        '#default_value' => variable_get('qtr_renorm_q', 0),
+    );
 
-  $form['params']['qtr_renorm_t'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Renormalization of trust'),
-    '#default_value' => variable_get('qtr_renorm_t', 0),
-  );
+    $form['params']['qtr_renorm_r'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Renormalization of reputation'),
+        '#default_value' => variable_get('qtr_renorm_r', 0),
+    );
 
-  $form['params']['qtr_resc_q'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Rescaled quality'),
-    '#default_value' => variable_get('qtr_resc_q', 0),
-  );
+    $form['params']['qtr_renorm_t'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Renormalization of trust'),
+        '#default_value' => variable_get('qtr_renorm_t', 0),
+    );
 
-  $form['params']['qtr_resc_r'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Rescaled reputation'),
-    '#default_value' => variable_get('qtr_resc_r', 0),
-  );
+    $form['params']['qtr_resc_q'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Rescaled quality'),
+        '#default_value' => variable_get('qtr_resc_q', 0),
+    );
 
-  $form['params']['qtr_resc_t'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Rescaled trust'),
-    '#default_value' => variable_get('qtr_resc_t', 0),
-  );
+    $form['params']['qtr_resc_r'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Rescaled reputation'),
+        '#default_value' => variable_get('qtr_resc_r', 0),
+    );
 
-  $form['submit']=array(
-    	'#type'=>'submit',
-    	'#value'=>t('Save'),
+    $form['params']['qtr_resc_t'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Rescaled trust'),
+        '#default_value' => variable_get('qtr_resc_t', 0),
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save'),
     );
     return $form;
 }
 
 function qtr_settings_submit($form, &$form_state) {
-	$params=$form_state['values'];
-	variable_set('qtr_delta', $params['qtr_delta']);
-	variable_set('qtr_decay', $params['qtr_decay']);
-	variable_set('qtr_tau0', $params['qtr_tau0']);
-	variable_set('qtr_renorm_q', $params['qtr_renorm_q']);
-	variable_set('qtr_renorm_r', $params['qtr_renorm_r']);
-	variable_set('qtr_renorm_t', $params['qtr_renorm_t']);
-	variable_set('qtr_resc_q', $params['qtr_resc_q']);
-	variable_set('qtr_resc_r', $params['qtr_resc_t']);
-	variable_set('qtr_resc_t', $params['qtr_resc_t']);
-	$actions=qtr_get_actiontype();
-  	if($actions){
-  		foreach($actions as $action){
-  			qtr_update_actionweight($action->action,$params['qtr_w_'.$action->action]);
-  		}
-  	}
-  	drupal_set_message(t('The settings have been saved. '));
-	
+    $params = $form_state['values'];
+    variable_set('qtr_delta', $params['qtr_delta']);
+    variable_set('qtr_decay', $params['qtr_decay']);
+    variable_set('qtr_tau0', $params['qtr_tau0']);
+    variable_set('qtr_renorm_q', $params['qtr_renorm_q']);
+    variable_set('qtr_renorm_r', $params['qtr_renorm_r']);
+    variable_set('qtr_renorm_t', $params['qtr_renorm_t']);
+    variable_set('qtr_resc_q', $params['qtr_resc_q']);
+    variable_set('qtr_resc_r', $params['qtr_resc_t']);
+    variable_set('qtr_resc_t', $params['qtr_resc_t']);
+    $actions = qtr_get_actiontype();
+    if ($actions) {
+        foreach ($actions as $action) {
+            qtr_update_actionweight($action->action, $params['qtr_w_' . $action->action]);
+        }
+    }
+    drupal_set_message(t('The settings have been saved. '));
 }
 
 function qtr_demo() {
-  qtr_from_db();
-  return '';
+    qtr_from_db();
+    return '';
 }
 
 function qtr_from_db($trust = NULL) {
-  $agent = $item = NULL;
-  _qtr_init($agent, $item, 50, 1000);
-  _qtr_read($agent, $item, $trust);
-  _qtr_calculate($agent, $item, $trust, 695);
-  
-  //write the result of reputation of user and quality of paper into files
-  //$path_agents = drupal_get_path('module', 'qtr') . "/agent_file";
-  //$path_items = drupal_get_path('module', 'qtr') . "/item_file";
-  
-  //_qtr_save($agent, $item, $path_agents,$path_items);
-  qtr_write_values('qtr_reputation', $agent);
-  qtr_write_values('qtr_quality', $item);
+    $agent = $item = NULL;
+    _qtr_init($agent, $item, 50, 1000);
+    _qtr_read($agent, $item, $trust);
+    _qtr_calculate($agent, $item, $trust, 695);
+
+    //write the result of reputation of user and quality of paper into files
+    //$path_agents = drupal_get_path('module', 'qtr') . "/agent_file";
+    //$path_items = drupal_get_path('module', 'qtr') . "/item_file";
+    //_qtr_save($agent, $item, $path_agents,$path_items);
+    qtr_write_values('qtr_reputation', $agent);
+    qtr_write_values('qtr_quality', $item);
 }
 
 /*
  * Implemens hook_block_info
  */
-function qtr_block_info(){
+
+function qtr_block_info() {
     $blocks['popular'] = array(
         'info' => t('Popular content'),
         'region' => 'sidebar_first',
@@ -220,61 +221,63 @@ function qtr_block_info(){
 /*
  * Implements hook_block_configure
  */
+
 function qtr_block_configure($delta = '') {
-  if ($delta == 'popular') {
-    $posttype = array ();$default = array();
-    foreach (node_type_get_types() as $type => $type_obj) {
+    if ($delta == 'popular') {
+        $posttype = array();
+        $default = array();
+        foreach (node_type_get_types() as $type => $type_obj) {
             $posttype[$type] = $type_obj->name;
-            if(variable_get('popular_block_'.$type,0)){
-              $default[]=$type;
+            if (variable_get('popular_block_' . $type, 0)) {
+                $default[] = $type;
             }
+        }
+        $form['content_type'] = array(
+            '#type' => 'checkboxes',
+            '#title' => t('Content type to display'),
+            '#options' => $posttype,
+            '#default_value' => $default,
+        );
+        return $form;
     }
-    $form['content_type'] = array(
-      '#type' => 'checkboxes', 
-      '#title' => t('Content type to display'), 
-      '#options' => $posttype,
-      '#default_value' => $default,
-    );
-    return $form;
-  }
 }
-  
+
 /*
  * Implements hook_block_save
  */
+
 function qtr_block_save($delta, $edit = array()) {
-  if ($delta == 'popular') {
-    foreach (node_type_get_types() as $type => $type_obj) {
-      if(variable_get('popular_block_'.$type,0)){
-        variable_del('popular_block_'.$type);
-      }
+    if ($delta == 'popular') {
+        foreach (node_type_get_types() as $type => $type_obj) {
+            if (variable_get('popular_block_' . $type, 0)) {
+                variable_del('popular_block_' . $type);
+            }
+        }
+        foreach ($edit['content_type'] as $type) {
+            variable_set('popular_block_' . $type, $type);
+        }
     }
-   foreach($edit['content_type'] as $type){
-      variable_set('popular_block_'.$type, $type);
-   }
-  }
 }
 
 /*
  * Implements hook_block_view
  */
-function qtr_block_view($delta = ''){
-  if($delta == 'popular'){
-    $showlist=qtr_get_topquality(5);
-    $blocks['subject'] = 'Popular content';
-    $contents = '<ul>';
-    if($showlist){
-    	foreach($showlist as $list){
-            $contents .= '<li><a href="node/'.$list->nid.'" target="_blank">'.$list->title."</a></li>";
-    	}
-    }else{
-    	$contents .='No polular content yet.';
+
+function qtr_block_view($delta = '') {
+    if ($delta == 'popular') {
+        $showlist = qtr_get_topquality(5);
+        $blocks['subject'] = 'Popular content';
+        $contents = '<ul>';
+        if ($showlist) {
+            foreach ($showlist as $list) {
+                $contents .= '<li><a href="node/' . $list->nid . '" target="_blank">' . $list->title . "</a></li>";
+            }
+        } else {
+            $contents .='No polular content yet.';
+        }
+        $contents .= '</ul>';
+        $blocks['content'] = $contents;
+        return $blocks;
     }
-    $contents .= '</ul>';
-    $blocks['content'] = $contents;
-    return $blocks;
-  }
-    
-    
 }
 
