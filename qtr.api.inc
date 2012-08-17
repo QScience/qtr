@@ -67,15 +67,17 @@ function qtr_write_values($table, $values) {
         }
         switch($table){
                 case "qtr_reputation":
+                        $i = 0;
                         foreach($sorted_values as $id => $value){
                                 $sql = "";
                                 db_insert('qtr_reputation')
                                     ->fields(array(
                                         'uid'        => $id,
-                                        'rank'       => $value['rank'],
+                                        'rank'       => $i,
                                         'reputation' => $value['reputation']
                                     ))
                                    ->execute();
+                                $i++;
                         }
                         break;
             case "qtr_quality":

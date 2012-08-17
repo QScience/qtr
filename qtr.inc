@@ -70,8 +70,10 @@ function _qtr_read(&$agent, &$item, $trust) {
     $time = (int) $action->timestamp;
     $rw = $action->weight;
     if (!in_array($a, $agent[$i]['collection'])) { // this is to avoid duplicates; it is possible to remove this control
-      $item[$a]['reader'][] = $i; $agent[$i]['collection'][] = $a;
-      $item[$a]['r_time'][] = $time; $agent[$i]['c_time'][] = $time;
+      $item[$a]['reader'][] = $i; 
+      $agent[$i]['collection'][] = $a;
+      $item[$a]['r_time'][] = $time; 
+      $agent[$i]['c_time'][] = $time;
       $item[$a]['r_weight'][] = $rw;
       $agent[$i]['c_weight'][] = $rw;
     }
@@ -79,14 +81,13 @@ function _qtr_read(&$agent, &$item, $trust) {
   /* now if $trust is not NULL, reading input file for trust relationships */
   /* FORMAT: userID \t ID_of_user_trusted_by_i \t amount_of_trust */
   if ($trust !== NULL) {
-    $ifs_ET = file($trust);
-    foreach ($ifs_ET as $line) {
-      $words = explode("\t", $line);
-      $i = (int) $words[0];
-      $j = (int) $words[1];
-      $tt = (double) $words[2];
+    $results = db_query("SELECT * FROM {qtr_trust}");
+    foreach ($results as $result) {
+      $i = (int) $result->uid1;
+      $j = (int) $result->uid2;
+      $tt = (double) $result->trust;
       $agent[$i]['neighbor'][] = $j;
-      $agent[$i]['t_exp'][$tt];
+      $agent[$i]['t_exp'][] = $tt;
     }
   }
 }
