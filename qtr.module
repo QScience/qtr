@@ -6,12 +6,12 @@ require_once 'qtr.api.inc';
 function qtr_menu() {
   $items = array();
 
-/*  $items['qtr/demo'] = array(
+  $items['qtr/demo'] = array(
     'title' => 'QTR demonstration',
     'description' => 'Running QTR on sample data',
     'page callback' => 'qtr_demo',
     'access arguments' => array('access QTR demonstration'),
-  );*/
+  );
 
   $items['admin/config/user-interface/qtr'] = array(
     'title' => 'QTR',
@@ -186,21 +186,23 @@ function qtr_settings_submit($form, &$form_state) {
 }
 
 function qtr_demo() {
-  qtr_from_file(drupal_get_path('module', 'qtr') . '/EF_complete_new.dat');
+  qtr_from_db();
   return '';
 }
 
-function qtr_from_file($user_item, $trust = NULL) {
+function qtr_from_db($user_item, $trust = NULL) {
   $agent = $item = NULL;
   _qtr_init($agent, $item, 50, 1000);
-  _qtr_read($agent, $item, $user_item, $trust);
+  _qtr_read($agent, $item, $trust);
   _qtr_calculate($agent, $item, $trust, 695);
   
   //write the result of reputation of user and quality of paper into files
-  $path_agents = drupal_get_path('module', 'qtr') . "/agent_file";
-  $path_items = drupal_get_path('module', 'qtr') . "/item_file";
+  //$path_agents = drupal_get_path('module', 'qtr') . "/agent_file";
+  //$path_items = drupal_get_path('module', 'qtr') . "/item_file";
   
-  _qtr_save($agent, $item, $path_agents,$path_items);
+  //_qtr_save($agent, $item, $path_agents,$path_items);
+  qtr_write_values('qtr_reputation', $agent);
+  qtr_write_values('qtr_quality', $item);
 }
 
 /*
