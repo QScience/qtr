@@ -190,7 +190,7 @@ function qtr_demo() {
   return '';
 }
 
-function qtr_from_db($user_item, $trust = NULL) {
+function qtr_from_db($trust = NULL) {
   $agent = $item = NULL;
   _qtr_init($agent, $item, 50, 1000);
   _qtr_read($agent, $item, $trust);
