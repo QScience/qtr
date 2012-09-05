@@ -64,18 +64,31 @@ function qtr_write_values($table, $values) {
 	}
 	switch ($table) {
 		case "qtr_reputation" :
-			$del = db_delete('qtr_reputation')->execute();
+			$time=strtotime('now');
+			$latestTime=db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
+			if($latestTime){
+				$monthnow=(int)date('m',$time);
+				$monthlast=(int)date('m',$latestTime[0]); 
+				if($monthnow<=$monthlast){//overwrite the reputation 
+				 $del = db_delete('qtr_reputation')->condition('timestamp',$latestTime)->execute();
+				}
+			}
+			
 			$i = 1;
-			if (count($sorted_values))
+			if (count($sorted_values)){
+				$count = db_query("SELECT COUNT(*) FROM {users}")->fetchCol();
 				foreach ($sorted_values as $id => $value) {
 					$sql = "";
 					db_insert('qtr_reputation')->fields(array (
 						'uid' => $id,
 						'rank' => $i,
-						'reputation' => $value
+						'reputation' => $value,
+						'percentile'=>$i/$count[0],
+						'timestamp'=>$time,
 					))->execute();
 					$i++;
 				}
+			}
 			break;
 		case "qtr_quality" :
 			$del = db_delete('qtr_quality')->execute();
@@ -108,20 +121,6 @@ function qtr_get_actions() {
 
 }
 
-function qtr_get_actions_by_user() {
-    // TODO
-    return $actions;
-}
-
-function qtr_get_actions_by_action_type($action_type = NULL) {
-    // TODO
-    return $actions;
-}
-
-function qtr_get_actions_by_entity_type($entity_type = NULL) {
-    // TODO
-    return $actions;
-}
 
 /* GET VALUES
  * @param $table
@@ -132,8 +131,9 @@ function qtr_get_actions_by_entity_type($entity_type = NULL) {
 function qtr_get_value($table, $field, $id) {
 	switch ($table) {
 		case "qtr_reputation" :
+			$latestTime=db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
 			$query = db_select('qtr_reputation', 'q');
-			$result = $query->fields('q',array($field))->condition('uid', $id)->execute()->fetchCol();
+			$result = $query->fields('q',array($field))->condition('uid', $id)->condition('timestamp', $latestTime[0])->execute()->fetchCol();
 			return $result;
 			break;
 		case "qtr_quality" :
@@ -269,6 +269,33 @@ function qtr_get_topquality($num) {
         return false;
     }
 }
+/**
+ * 
+ * get top items by action type
+ * @param {mixed} $num The number of returned items
+ * @param {mixed} $actiontype 
+ * @param {mixed} $time how many days to statistic the result 
+ */
+function qtr_get_topitems($num,$actiontype,$time) {
+	$start=strtotime('now')-$time*24*3600;
+    $showlist = array();
+    $count = 0;
+    $types = array();
+    foreach (node_type_get_types() as $type => $type_obj) {
+        if (variable_get('popular_block_' . $type, 0)) {
+            $types[] = $type;
+        }
+    }
+    if (count($types) > 0) {
+        $types = implode("','", $types);
+        $types = "'".$types."'";
+        $sql = 'SELECT n.nid,n.title,count(*) as count FROM {qtr_actions} AS q INNER JOIN {node} as n ON q.nid=n.nid and n.type IN (' . $types . ')  where q.action_type='.$actiontype.' AND q.timestamp>'.$start.' GROUP BY n.nid ORDER BY count DESC LIMIT ' . $num;
+        $result = db_query($sql)->fetchAll();
+        return $result;
+    }else{
+        return false;
+    }
+}
 
 /**
  * Implements hook_exit().
@@ -301,5 +328,45 @@ function qtr_exit() {
 			}
 
 	qtr_write_action($uid, $nid, $aid);
+}
+
+/**
+ * cout the user's reputation history as a chart'
+ *
+ */
+function qtr_chart_reputation($uid) {
+	$page['chart'] = array(
+     '#theme' => 'chart',
+     '#chart_id' => 'reprtation_history_chart',
+     '#title' => t('Reputation Over Time'),
+     '#type' => CHART_TYPE_LINE,
+     '#size' => chart_size(400, 200),
+     '#grid_lines' => chart_grid_lines(15, 15),
+      '#adjust_resolution' => TRUE, 
+  );
+	$query = db_select('qtr_reputation', 'q');
+	$result = $query->fields('q',array('percentile','timestamp'))->condition('uid', $uid)->orderBy('timestamp','asc')->range(0,12)->execute()->fetchAll();
+	$percentile = array();
+	for($i=11;$i>=0;$i--){
+		$month=date('y-m', strtotime("-".$i." months"));
+		$percentile[$month]=0;
+		$page['chart']['#mixed_axis_labels'][CHART_AXIS_X_BOTTOM][0][] = chart_mixed_axis_label($month);
+	}
+	$max=0;
+	foreach($result as $repu){
+		if($repu->percentile){
+			$percentile[date('y-m',$repu->timestamp)]=1-$repu->percentile;
+			if(1-$repu->percentile>$max)
+			$max=1-$repu->percentile;
+		}
+			
+	}
+	foreach($percentile as $key=>$value){
+   		$page['chart']['#data'][]=$value;
+   		$page['chart']['#data_colors'][] = '3366CC';
+	}
+  $page['chart']['#mixed_axis_labels'][CHART_AXIS_Y_LEFT][0][] = chart_mixed_axis_range_label(0, $max+0.1);
+
+  return $page;
 }
 

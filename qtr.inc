@@ -116,7 +116,7 @@ function _qtr_read(&$agent, &$item, $trust) {
 }
 
 function _qtr_decay($tau) {
-    $tau0 = variable_get('qtr_tau0', 50);
+    $tau0 = variable_get('qtr_tau0', 50)*24*3600;
     switch (variable_get('qtr_decay', 0)) {
         case 1:
             return pow(1. + ((double) $tau) / $tau0, -1);
@@ -182,6 +182,7 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
       for ($a = 0; $a < count($agent[$i]['collection']); $a++) {
         $agent[$i]['reputation'] += $agent[$i]['c_weight'][$a] * ($item[$agent[$i]['collection'][$a]]['q_tmp'] - variable_get('qtr_resc_q', 0) * $avg_q) *
           _qtr_decay($start - $agent[$i]['c_time'][$a]) / pow(count($agent[$i]['collection']), variable_get('qtr_renorm_r', 0));
+          print_r(( variable_get('qtr_resc_q', 0) * $avg_q));
       }
       if ($trust !== NULL) {
         for ($j = 0; $j < count($agent[$i]['neighbor']); $j++) {

@@ -61,7 +61,7 @@ function qtr_run_form($form, &$form_state){
   	);
   $form['run'] = array(
     '#type' => 'submit',
-    '#value' => t('Run recommender'),
+    '#value' => t('Run QTR'),
     '#submit' => array('qtr_demo'),
   );
     return $form;	
@@ -139,7 +139,7 @@ function qtr_settings($form, &$form_state) {
 
     $form['params']['qtr_tau0'] = array(
         '#type' => 'textfield',
-        '#title' => t('Time scale of the decay'),
+        '#title' => t('Time scale of the decay (day)'),
         '#default_value' => variable_get('qtr_tau0', 50),
     );
 
@@ -215,8 +215,9 @@ function qtr_from_db($trust = NULL) {
   $agent = $item = NULL;
  // _qtr_init($agent, $item, 50, 1000);
   _qtr_read($agent, $item, $trust);
+  $start=strtotime('now');
   if(count($agent)&&count($item)){
-  	 _qtr_calculate($agent, $item, $trust, 695);
+  	 _qtr_calculate($agent, $item, $trust, $start);
   }
   
   //write the result of reputation of user and quality of paper into files
@@ -234,11 +235,21 @@ function qtr_from_db($trust = NULL) {
 
 function qtr_block_info() {
     $blocks['popular'] = array(
-        'info' => t('Popular content'),
+        'info' => t('Highlighted contents'),
         'region' => 'sidebar_first',
         'status' => TRUE
     );
     return $blocks;
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function qtr_init() {
+  //$_moduleName_='user_block';
+  //drupal_add_css(drupal_get_path('module', $_moduleName_) . '/' . $_moduleName_  . '.css');
+  drupal_add_css(drupal_get_path('module', 'qtr') . '/qtr.css');
+  drupal_add_js(drupal_get_path('module', 'qtr') . '/qtr.js');
 }
 
 /*
@@ -289,16 +300,35 @@ function qtr_block_save($delta, $edit = array()) {
 function qtr_block_view($delta = '') {
     if ($delta == 'popular') {
         $showlist = qtr_get_topquality(5);
-        $blocks['subject'] = 'Popular content';
-        $contents = '<ul>';
+        $blocks['subject'] = 'Highlighted contents';
+		$contents='<ul class="option">
+			<span class="optionlink optionlinkon" id="byquality"><a
+		href="javascript:PopByQuality()"><span class="Clink">top papers</span></a>
+	</span>
+			<span class="optionlink optionlinkoff" id="bydownload"><a
+		href="javascript:PopByBownload()"><span class="Clink">most downloads</span></a>
+	</span>
+</ul>';
+        $contents .= '<div class="Visible" id="quality"><ul>';
         if ($showlist) {
             foreach ($showlist as $list) {
-                $contents .= '<li><a href="node/' . $list->nid . '" target="_blank">' . $list->title . "</a></li>";
+                $contents .= '<li><a href="'.url('node/' . $list->nid) . '" target="_blank">' . $list->title . "</a></li>";
             }
         } else {
             $contents .='No polular content yet.';
         }
-        $contents .= '</ul>';
+        $contents .= '</ul><a href="'.url().'" class="more"><strong>show more </strong></a></div>';
+        $showlist = qtr_get_topitems(5,2,30);
+        $contents .= '<div class="listsHidden" id="download"><ul>';
+        if ($showlist) {
+            foreach ($showlist as $list) {
+                $contents .= '<li><a href="'.url('node/' . $list->nid) . '" target="_blank">' . $list->title . "</a> (".$list->count." downloads)</li>";
+            }
+        } else {
+            $contents .='No polular content yet.';
+        }
+        $contents .= '</ul><a href="'.url().'" class="more"><strong>show more </strong></a></div>';
+        global $user;
         $blocks['content'] = $contents;
         return $blocks;
     }  
