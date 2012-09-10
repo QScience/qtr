@@ -5,5 +5,4 @@ version = 7.x-1.x-dev
 package = Reputation
 
 dependencies[] = plus1
-dependencies[] = chart
 files[] = qtr.install

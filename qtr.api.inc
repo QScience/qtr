@@ -335,22 +335,16 @@ function qtr_exit() {
  *
  */
 function qtr_chart_reputation($uid) {
-	$page['chart'] = array(
-     '#theme' => 'chart',
-     '#chart_id' => 'reprtation_history_chart',
-     '#title' => t('Reputation Over Time'),
-     '#type' => CHART_TYPE_LINE,
-     '#size' => chart_size(400, 200),
-     '#grid_lines' => chart_grid_lines(15, 15),
-      '#adjust_resolution' => TRUE, 
-  );
+	$user=user_load($uid);
+
 	$query = db_select('qtr_reputation', 'q');
 	$result = $query->fields('q',array('percentile','timestamp'))->condition('uid', $uid)->orderBy('timestamp','asc')->range(0,12)->execute()->fetchAll();
 	$percentile = array();
+	$chxl='0:|';
 	for($i=11;$i>=0;$i--){
 		$month=date('y-m', strtotime("-".$i." months"));
 		$percentile[$month]=0;
-		$page['chart']['#mixed_axis_labels'][CHART_AXIS_X_BOTTOM][0][] = chart_mixed_axis_label($month);
+		$chxl.=$month.'|';
 	}
 	$max=0;
 	foreach($result as $repu){
@@ -361,12 +355,35 @@ function qtr_chart_reputation($uid) {
 		}
 			
 	}
+	$chxr='1,0,'.$max;
+	$chd='t:';
 	foreach($percentile as $key=>$value){
-   		$page['chart']['#data'][]=$value;
-   		$page['chart']['#data_colors'][] = '3366CC';
+		$chd.=$value.',';
 	}
-  $page['chart']['#mixed_axis_labels'][CHART_AXIS_Y_LEFT][0][] = chart_mixed_axis_range_label(0, $max+0.1);
+	$chd=trim($chd,',');
 
-  return $page;
+
+
+//
+$data=array();
+$data['cht']='lc';//chart type
+$data['chtt']=t('Percentile of '.$user->name.'\'s reputation that higher than others');//title
+$data['chs']='600x200';
+$data['chm']='c,FF0000,0,-1,5';
+$data['chg']='-1,-1,1,1';
+$data['chxt']='x,y';
+$data['chds']='0,'.$max;
+//$data['chxr']='0,0,'.$max;
+$data['chd']=$chd;
+$data['chxl']=trim($chxl,'|');
+$data['chxr']=$chxr;
+//$data['cht']='';
+
+
+$attributes['id'] = 'chart-reputation-history';
+    $attributes['class'][] = 'chart';
+$url=url(CHART_URI, array('query' => $data, 'external' => TRUE));
+ return theme('image', array('path' => $url, 'attributes' => $attributes, 'alt' => 'Percentile of '.$user->name.'\'s reputation that higher than others'));
+
 }
 
