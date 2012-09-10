@@ -346,6 +346,7 @@ function qtr_chart_reputation($uid) {
 		$percentile[$month]=0;
 		$chxl.=$month.'|';
 	}
+	$chxl.='2:|%';
 	$max=0;
 	foreach($result as $repu){
 		if($repu->percentile){
@@ -355,7 +356,7 @@ function qtr_chart_reputation($uid) {
 		}
 			
 	}
-	$chxr='1,0,'.$max;
+	$chxr='1,0,'.($max+0.1)*100;
 	$chd='t:';
 	foreach($percentile as $key=>$value){
 		$chd.=$value.',';
@@ -371,11 +372,11 @@ $data['chtt']=t('Percentile of '.$user->name.'\'s reputation that higher than ot
 $data['chs']='600x200';
 $data['chm']='c,FF0000,0,-1,5';
 $data['chg']='-1,-1,1,1';
-$data['chxt']='x,y';
-$data['chds']='0,'.$max;
-//$data['chxr']='0,0,'.$max;
+$data['chxt']='x,y,t';
+$data['chds']='0,'.($max+0.1);
 $data['chd']=$chd;
 $data['chxl']=trim($chxl,'|');
+$data['chxp']='2,-1';
 $data['chxr']=$chxr;
 //$data['cht']='';
 
