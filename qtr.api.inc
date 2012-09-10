@@ -382,7 +382,7 @@ $data['chxr']=$chxr;
 
 $attributes['id'] = 'chart-reputation-history';
     $attributes['class'][] = 'chart';
-$url=url(CHART_URI, array('query' => $data, 'external' => TRUE));
+$url=url('https://chart.googleapis.com/chart', array('query' => $data, 'external' => TRUE));
  return theme('image', array('path' => $url, 'attributes' => $attributes, 'alt' => 'Percentile of '.$user->name.'\'s reputation that higher than others'));
 
 }
