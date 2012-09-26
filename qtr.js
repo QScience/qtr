@@ -1,12 +1,14 @@
-function PopByQuality(){
-    document.getElementById('quality').className='Visible';
-    document.getElementById('download').className='listsHidden';
-    document.getElementById('byquality').className='optionlink optionlinkon';
-    document.getElementById('bydownload').className='optionlink optionlinkoff';
-}
-function PopByBownload(){
-    document.getElementById('quality').className='listsHidden';
-    document.getElementById('download').className='Visible';
-    document.getElementById('byquality').className='optionlink optionlinkoff';
-    document.getElementById('bydownload').className='optionlink optionlinkon';
-}
+
+jQuery.noConflict();  
+jQuery(document).ready(function() {
+	jQuery(".tabLink").each(function(){
+		jQuery(this).click(function(){
+        tabeId = $(this).attr('id');
+        jQuery(".tabLink").removeClass("active_tab");
+        jQuery(this).addClass("active_tab");
+        jQuery(".tabcontent").addClass("hide");
+        jQuery("#"+tabeId+"-1").removeClass("hide")   
+        return false;	  
+      });
+    });  
+});

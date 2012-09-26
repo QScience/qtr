@@ -289,7 +289,7 @@ function qtr_get_topitems($num,$actiontype,$time) {
     if (count($types) > 0) {
         $types = implode("','", $types);
         $types = "'".$types."'";
-        $sql = 'SELECT n.nid,n.title,count(*) as count FROM {qtr_actions} AS q INNER JOIN {node} as n ON q.nid=n.nid and n.type IN (' . $types . ')  where q.action_type='.$actiontype.' AND q.timestamp>'.$start.' GROUP BY n.nid ORDER BY count DESC LIMIT ' . $num;
+        $sql = 'SELECT n.nid,n.title,count(q.nid) as count FROM {node} AS n LEFT JOIN {qtr_actions} as q ON q.nid=n.nid and q.action_type='.$actiontype.' AND q.timestamp>'.$start.' where n.type IN (' . $types . ') GROUP BY n.nid ORDER BY count DESC LIMIT ' . $num;
         $result = db_query($sql)->fetchAll();
         return $result;
     }else{
@@ -305,6 +305,8 @@ function qtr_get_topitems($num,$actiontype,$time) {
 function qtr_exit() {
 	global $user;
 	$uid = $user->uid;
+	if($uid==0)
+	return;
 
 	drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
 	drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
