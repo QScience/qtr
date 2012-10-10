@@ -302,7 +302,7 @@ function qtr_block_view($delta = '') {
 		$contents='	<div class="title_block_head">
 						<h2>Highlighted papers</h2>	
 						<div id="tab_menu">
-							<a href="javascript:;" id="cont-1" class="tabLink active_tab">Top papers</a>
+							<a href="javascript:;" id="cont-1" class="tabLink active_tab">Top value</a>
 							<a href="javascript:;" id="cont-2" class="tabLink ">Most downloads</a>
 							<a href="javascript:;" id="cont-3" class="tabLink ">Most votes</a>
 							<div class="clear"></div>
