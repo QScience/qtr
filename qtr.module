@@ -321,7 +321,7 @@ function qtr_block_view($delta = '') {
         }
 		$contents .= '</ul>
 						<div class="right_align">
-								<a href="'.url('papers/popular').'" class="red_see_more2">See more</a>
+								<a href="'.url('papers/popular').'" class="red_see_more2">Show more</a>
 							</div>
 						</div>
 						<div class="tabcontent hide" id="cont-2-1"><ul class="red_arrow_li">';
@@ -334,7 +334,7 @@ function qtr_block_view($delta = '') {
             $contents .='No polular content yet.';
         }
 		$contents .='</ul><div class="right_align">
-								<a href="'.url('papers/popular',array('query'=>array('order'=>'download'))).'" class="red_see_more2">See more</a>
+								<a href="'.url('papers/popular',array('query'=>array('order'=>'download'))).'" class="red_see_more2">Show more</a>
 							</div></div><div class="tabcontent hide" id="cont-3-1"><ul class="red_arrow_li">';
 		$showlist = qtr_get_topitems(5,1,30);
 		if ($showlist) {
@@ -345,7 +345,7 @@ function qtr_block_view($delta = '') {
             $contents .='No polular content yet.';
         }
         $contents .='</ul><div class="right_align">
-								<a href="'.url('papers/popular',array('query'=>array('order'=>'vote'))).'" class="red_see_more2">See more</a>
+								<a href="'.url('papers/popular',array('query'=>array('order'=>'vote'))).'" class="red_see_more2">Show more</a>
 							</div></div></div>';
 				
    
