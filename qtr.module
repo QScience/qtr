@@ -300,7 +300,7 @@ function qtr_block_save($delta, $edit = array()) {
 function qtr_block_view($delta = '') {
 	 if ($delta == 'popular') {
 		$contents='	<div class="title_block_head">
-						<h2>Highlighted papers</h2>	
+						<h2>Top papers</h2>	
 						<div id="tab_menu">
 							<a href="javascript:;" id="cont-1" class="tabLink active_tab">Top value</a>
 							<a href="javascript:;" id="cont-2" class="tabLink ">Most downloads</a>
