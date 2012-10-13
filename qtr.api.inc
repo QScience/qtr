@@ -344,15 +344,15 @@ function qtr_chart_reputation($uid) {
 	$percentile = array();
 	$chxl='0:|';
 	for($i=11;$i>=0;$i--){
-		$month=date('y-m', strtotime("-".$i." months"));
+		$month=date('m-y', strtotime("-".$i." months"));
 		$percentile[$month]=0;
 		$chxl.=$month.'|';
 	}
-	$chxl.='2:|%';
+	$chxl.='2:|Percentile/Month-Year';
 	$max=0;
 	foreach($result as $repu){
 		if($repu->percentile){
-			$percentile[date('y-m',$repu->timestamp)]=1-$repu->percentile;
+			$percentile[date('m-y',$repu->timestamp)]=1-$repu->percentile;
 			if(1-$repu->percentile>$max)
 			$max=1-$repu->percentile;
 		}
@@ -370,7 +370,7 @@ function qtr_chart_reputation($uid) {
 //
 $data=array();
 $data['cht']='lc';//chart type
-$data['chtt']=t('Percentile of '.$user->name.'\'s reputation that higher than others');//title
+$data['chtt']=t(''.$user->name.'\'s reputation percentile (how many users have lower reputation than '.$user->name.')');//title
 $data['chs']='600x200';
 $data['chm']='c,FF0000,0,-1,5';
 $data['chg']='-1,-1,1,1';
