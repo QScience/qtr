@@ -103,6 +103,7 @@ function qtr_schema() {
         'indexes' => array(
             'qtr_user' => array('uid'),
             'qtr_action_type' => array('action_type'),
+        		'qtr_time'=>array('timestamp'),
         ),
     );
 
@@ -157,6 +158,9 @@ function qtr_schema() {
             ),
         ),
         'primary key' => array('nid'),
+        'indexes' => array(
+            'qtr_quality' => array('quality'),
+        ),
     );
 
     $schema['qtr_trust'] = array(

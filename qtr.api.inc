@@ -75,15 +75,15 @@ function qtr_write_values($table, $values) {
 			}
 			
 			$i = 1;
-			if (count($sorted_values)){
-				$count = db_query("SELECT COUNT(*) FROM {users}")->fetchCol();
+			$count = count($sorted_values);
+			if ($count){				
 				foreach ($sorted_values as $id => $value) {
 					$sql = "";
 					db_insert('qtr_reputation')->fields(array (
 						'uid' => $id,
 						'rank' => $i,
 						'reputation' => $value,
-						'percentile'=>$i/$count[0],
+						'percentile'=>$i/$count,
 						'timestamp'=>$time,
 					))->execute();
 					$i++;
@@ -289,7 +289,7 @@ function qtr_get_topitems($num,$actiontype,$time) {
     if (count($types) > 0) {
         $types = implode("','", $types);
         $types = "'".$types."'";
-        $sql = 'SELECT n.nid,n.title,count(q.nid) as count FROM {node} AS n LEFT JOIN {qtr_actions} as q ON q.nid=n.nid and q.action_type='.$actiontype.' AND q.timestamp>'.$start.' where n.type IN (' . $types . ') GROUP BY n.nid ORDER BY count DESC LIMIT ' . $num;
+        $sql = 'SELECT n.nid,n.title,count(q.nid) as count FROM {node} AS n LEFT JOIN {qtr_actions} as q ON (q.nid=n.nid and q.action_type='.$actiontype.' AND q.timestamp>'.$start.') where n.type IN (' . $types . ') GROUP BY n.nid ORDER BY count DESC LIMIT ' . $num;
         $result = db_query($sql)->fetchAll();
         return $result;
     }else{
