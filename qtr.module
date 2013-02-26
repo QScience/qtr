@@ -392,6 +392,9 @@ function qtr_block_view($delta = '') {
  */
 
 function qtr_cron() {
-    qtr_demo();
+	if(variable_get('qtr_updatetime', 0)+24*3600<strtotime('now')){
+		variable_set('qtr_updatetime', strtotime('now')-50);
+	    qtr_demo();	
+	}
 }
 
