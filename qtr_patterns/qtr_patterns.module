@@ -1,0 +1,85 @@
+<?php
+/**
+ * @file
+ * Hook functions for Patterns integration
+ */
+
+function qtr_patterns($data = NULL){
+	
+  $tags['qtr_parameters']=array(
+    PATTERNS_INFO   => t('qtr parameters'),
+    PATTERNS_MODIFY => array('qtr_settings'),
+    PATTERNS_EXPORT => array(PATTERNS_EXPORT_ALL => 'qtr_patterns_export_parameters',),
+    );
+
+  $tags['qtr_item']=array(
+    PATTERNS_INFO   => t('qtr item'),
+    PATTERNS_MODIFY => array('qtr_set_form'),
+    PATTERNS_EXPORT => array(PATTERNS_EXPORT_ALL => 'qtr_patterns_export_item',),
+    );
+
+  return $tags;
+}
+
+/**
+ * hook_patterns_prepare()
+ */
+function qtr_patterns_prepare($action, $tag, &$data) {
+  // parameters.
+  if ($tag == 'qtr_parameters') {
+    if ($action == PATTERNS_MODIFY ) {
+    }
+  }
+
+  // item.
+  if ($tag == 'qtr_item') {
+    if ($action == PATTERNS_MODIFY ) {
+      //$data['content_type'][]='article';
+      //$data['content_type'][]='page';
+      $data['content_type'][]=$data['contenttype']['Article'];
+      $data['content_type'][]=$data['contenttype']['Basic page'];
+    }
+  }
+
+  return patterns_results();
+}
+
+function qtr_patterns_validate($action, $tag, &$data) {
+
+  $result = array();
+  $status = PATTERNS_SUCCESS;
+  $msg = '';
+  switch ($tag) {
+    // qtr_parameters tag.
+    case 'qtr_parameters' :
+      switch ($action) {
+        case PATTERNS_MODIFY :
+          break;
+      }
+      break;
+
+    //shortcut_link tag.
+    case 'qtr_item' :
+      switch ($action) {
+        case PATTERNS_MODIFY :
+          break;
+      }
+      break;
+  }
+  return patterns_results($status, $msg, $result);
+}
+
+/**
+ * hook_patterns_build()
+ */
+function qtr_patterns_build($action, $form_id, &$data = NULL, &$a) {
+  module_load_include('module', 'qtr', 'qtr');
+  return patterns_results(PATTERNS_SUCCESS, t('Execution successful(in build function)'), $data);
+}
+
+/**
+ * hook_patterns_cleanup()
+ */
+function qtr_patterns_cleanup($action, $tag, &$data) {
+  return patterns_results();
+}
