@@ -21,6 +21,61 @@ function qtr_patterns($data = NULL){
   return $tags;
 }
 
+function qtr_patterns_export_item($args = NULL, $result = NULL) {
+  $item = array();
+
+  $item['tag'] = 'qtr_item';
+  $item['contenttype'] = array();
+
+  foreach (node_type_get_types() as $type => $type_obj) {
+      $item['contenttype'][] = $type_obj->name;
+  }
+
+  $actions = array();
+
+  switch ($args['type']) {
+    case PATTERNS_MODIFY :
+      $action = array(PATTERNS_MODIFY => $item);
+      array_push($actions, $action);
+      break;
+  }
+
+  return $actions;
+}
+
+function qtr_patterns_export_parameters($args = NULL, $result = NULL) {
+
+  $params = array();
+
+  $params['tag'] = 'qtr_parameters';
+  $params['qtr_delta'] = variable_get('qtr_delta', 0.00000000001);
+  $actions = qtr_get_actiontype();
+  if ($actions) {
+      foreach ($actions as $action) {
+        $params['qtr_w_' . $action->action]=$action->weight;
+      }
+  }
+  $params['qtr_decay'] = variable_get('qtr_decay', 0);
+  $params['qtr_tau0'] = variable_get('qtr_tau0', 50);
+  $params['qtr_renorm_q'] = variable_get('qtr_renorm_q', 0);
+  $params['qtr_renorm_r'] = variable_get('qtr_renorm_r', 0);
+  $params['qtr_renorm_t'] = variable_get('qtr_renorm_t', 0);
+  $params['qtr_resc_q'] = variable_get('qtr_resc_q', 0);
+  $params['qtr_resc_r'] = variable_get('qtr_resc_r', 0);
+  $params['qtr_resc_t'] = variable_get('qtr_resc_t', 0);
+
+  $actions = array();
+
+  switch ($args['type']) {
+    case PATTERNS_MODIFY :
+      $action = array(PATTERNS_MODIFY => $params);
+      array_push($actions, $action);
+      break;
+  }
+
+  return $actions;
+}
+
 /**
  * hook_patterns_prepare()
  */
@@ -36,8 +91,16 @@ function qtr_patterns_prepare($action, $tag, &$data) {
     if ($action == PATTERNS_MODIFY ) {
       //$data['content_type'][]='article';
       //$data['content_type'][]='page';
-      $data['content_type'][]=$data['contenttype']['Article'];
-      $data['content_type'][]=$data['contenttype']['Basic page'];
+      //dump($data['contenttype']);
+      foreach (node_type_get_types() as $type => $type_obj) {
+        drupal_set_message($type);
+        foreach ($data['contenttype'] as $key => $value) {
+          if ($value==$type_obj->name) {
+            $data['content_type'][]=$type;
+            break;
+          }
+        }
+      }
     }
   }
 
