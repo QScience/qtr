@@ -81,8 +81,30 @@ function qtr_patterns_export_parameters($args = NULL, $result = NULL) {
  */
 function qtr_patterns_prepare($action, $tag, &$data) {
   // parameters.
+  module_load_include('inc', 'qtr', 'api');
   if ($tag == 'qtr_parameters') {
     if ($action == PATTERNS_MODIFY ) {
+      $params = array();
+      $params[] = 'qtr_delta';
+      $param_type = qtr_get_actiontype();
+      if ($param_type) {
+          foreach ($param_type as $pt ) {
+            $params[] = 'qtr_w_' . $pt ->action;
+          }
+      }
+      $params[] = 'qtr_decay';
+      $params[] = 'qtr_tau0';
+      $params[] = 'qtr_renorm_q';
+      $params[] = 'qtr_renorm_r';
+      $params[] = 'qtr_renorm_t';
+      $params[] = 'qtr_resc_q';
+      $params[] = 'qtr_resc_r';
+      $params[] = 'qtr_resc_t';
+      foreach ($data as $key => $value) {
+        if (!in_array($key, $params)) {
+          unset($data[$key]);
+        }
+      }
     }
   }
 
@@ -92,6 +114,7 @@ function qtr_patterns_prepare($action, $tag, &$data) {
       //$data['content_type'][]='article';
       //$data['content_type'][]='page';
       //dump($data['contenttype']);
+      unset($data['content_type']);
       foreach (node_type_get_types() as $type => $type_obj) {
         //drupal_set_message($type);
         foreach ($data['contenttype'] as $key => $value) {
@@ -117,7 +140,11 @@ function qtr_patterns_validate($action, $tag, &$data) {
     case 'qtr_parameters' :
       switch ($action) {
         case PATTERNS_MODIFY :
-          break;
+          if (empty($data)) {
+            $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED=> 
+                t('no valid parameters'));
+          } 
+        break;
       }
       break;
 
@@ -125,6 +152,10 @@ function qtr_patterns_validate($action, $tag, &$data) {
     case 'qtr_item' :
       switch ($action) {
         case PATTERNS_MODIFY :
+          if (empty($data['content_type'])) {
+            $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED=> 
+                t('no valid item type'));
+          } 
           break;
       }
       break;
