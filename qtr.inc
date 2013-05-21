@@ -71,8 +71,8 @@ function _qtr_read(&$agent, &$item, $trust) {
 //    $rating = (string) $action->action;
     $time = (int) $action->timestamp;
     $rw = $action->weight;
-    if(!isset($agent[$i])){
-    	$agent[$i]=array(
+    if( !isset($agent[$i]) ) {
+      $agent[$i]=array(
     'reputation' => 0.0, // reputation value
     'r_tmp' => 0.0,
     'collection' => array(), // ID of items the user has interacted with
@@ -81,16 +81,16 @@ function _qtr_read(&$agent, &$item, $trust) {
     'neighbor' => array(), // ID of trusted fellows of the users
     't_exp' => array() // amount of trust
   );
-    	
+ 
     }
-    if(!isset($item[$a])){
-    	$item[$a]= array(
+    if( !isset($item[$a]) ) {
+    	$item[$a] = array(
     'quality' => 0.0, // quality value
     'q_tmp' => 0.0,
     'reader' => array(), // ID of users who interacted with item
     'r_time' => array(), // time when an user interacted with item
     'r_weight' => array() // weight associated to the interaction
- 	 );
+    );
     }
     if (!in_array($a, $agent[$i]['collection'])) { // this is to avoid duplicates; it is possible to remove this control
       $item[$a]['reader'][] = $i; 
@@ -135,7 +135,7 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
   $err = count($agent) * count($item); $avg_q = 0; $avg_r = 0; $avg_t = 0; $nn = 0;
   if ($trust !== NULL) {
     //for ($i = 0; $i < count($agent); $i++) {
-    foreach ($agent as $i=>$content) {
+    foreach ($agent as $i => $content) {
       for ($j = 0; $j < count($agent[$i]['neighbor']); $j++) {
         $avg_t += $agent[$i]['t_exp'][$j];
         $nn++;
@@ -146,11 +146,11 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
 
   // setting the initial values of reputation and quality //
  // for ($a = 0; $a < count($item); $a++) {
- foreach ($item as $a=>$content) {
+ foreach ($item as $a => $content) {
     $item[$a]['q_tmp'] = 1. / sqrt(count($item));
   }
  // for ($i = 0; $i < count($agent); $i++) {
- foreach ($agent as $i=>$content) {
+ foreach ($agent as $i => $content) {
     $agent[$i]['r_tmp'] = 1. / sqrt(count($agent));
   }
 
@@ -160,7 +160,7 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
     $err = 0;
     $norm = 0;
    // for ($a = 0; $a < count($item); $a++) {
-   foreach ($item as $a=>$content) {
+   foreach ($item as $a => $content) {
       $item[$a]['quality'] = 0;
       for ($r = 0; $r < count($item[$a]['reader']); $r++) {
         $item[$a]['quality'] += $item[$a]['r_weight'][$r] * ($agent[$item[$a]['reader'][$r]]['r_tmp'] - variable_get('qtr_resc_r', 0) * $avg_r) * _qtr_decay($start - $item[$a]['r_time'][$r]) /
@@ -170,14 +170,14 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
     }
     // normalization of newly obtained qualities and updating of error
   //  for ($a = 0; $a < count($item); $a++) {
-  foreach ($item as $a=>$content) {
+  foreach ($item as $a => $content) {
       $item[$a]['quality'] /= sqrt($norm);
       $err += abs($item[$a]['quality'] - $item[$a]['q_tmp']);
     }
     // cycle on users to determine reputations
     $norm = 0;
   //  for ($i = 0; $i < count($agent); $i++) {
-  foreach ($agent as $i=>$content) {
+  foreach ($agent as $i => $content) {
       $agent[$i]['reputation'] = 0;
       for ($a = 0; $a < count($agent[$i]['collection']); $a++) {
         $agent[$i]['reputation'] += $agent[$i]['c_weight'][$a] * ($item[$agent[$i]['collection'][$a]]['q_tmp'] - variable_get('qtr_resc_q', 0) * $avg_q) *
@@ -192,7 +192,7 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
       $norm += pow($agent[$i]['reputation'], 2);
     }
    // for ($i = 0; $i < count($agent); $i++) {
-   foreach ($agent as $i=>$content) {
+   foreach ($agent as $i => $content) {
       $agent[$i]['reputation'] /= sqrt($norm);
       $err += abs($agent[$i]['reputation'] - $agent[$i]['r_tmp']);
     }
@@ -200,12 +200,12 @@ function _qtr_calculate(&$agent, &$item, $trust, $start) {
     // updating scores and averages //
     $avg_q = 0; $avg_r = 0;
    // for ($a = 0; $a < count($item); $a++) {
-   foreach ($item as $a=>$content) {
+   foreach ($item as $a => $content) {
       $item[$a]['q_tmp'] = $item[$a]['quality'];
       $avg_q += $item[$a]['quality'] / count($item);
     }
   //  for ($i = 0; $i < count($agent); $i++) {
-  foreach ($agent as $i=>$content) {
+  foreach ($agent as $i => $content) {
       $agent[$i]['r_tmp'] = $agent[$i]['reputation'];
       $avg_r = $agent[$i]['reputation'] / count($agent);
     }

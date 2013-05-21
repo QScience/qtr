@@ -17,31 +17,31 @@
  *   the action. Defaults, now()
  */
 function qtr_write_action($uid, $nid, $aid, $time = REQUEST_TIME) {
-	//check $uid
-	if (!user_load($uid)) {
-		return false;
-	}
-	//check $nid
-	if (!node_load($nid)) {
-		return false;
-	}
-	//check $aid
-	if (!qtr_get_actiontype($aid)) {
-		return false;
-	}
-	$query = db_select('qtr_actions', 'q');
+  //check $uid
+  if (!user_load($uid)) {
+    return false;
+  }
+  //check $nid
+  if (!node_load($nid)) {
+    return false;
+  }
+  //check $aid
+  if (!qtr_get_actiontype($aid)) {
+    return false;
+  }
+  $query = db_select('qtr_actions', 'q');
 
-	$result = $query->fields('q')->condition('uid', $uid)->condition('nid', $nid)->condition('action_type', $aid)->execute()->fetchCol();
-	if (!$result) {
-		db_insert('qtr_actions')->fields(array (
-			'uid' => $uid,
-			'nid' => $nid,
-			'action_type' => $aid,
-			'timestamp' => $time,
+  $result = $query->fields('q')->condition('uid', $uid)->condition('nid', $nid)->condition('action_type', $aid)->execute()->fetchCol();
+  if (!$result) {
+    db_insert('qtr_actions')->fields(array (
+      'uid' => $uid,
+      'nid' => $nid,
+      'action_type' => $aid,
+      'timestamp' => $time,
 
-			
-		))->execute();
-	}
+      
+    ))->execute();
+  }
 
 }
 
@@ -52,56 +52,56 @@ function qtr_write_action($uid, $nid, $aid, $time = REQUEST_TIME) {
  * @param {mixed} $values the array of values to insert
  */
 function qtr_write_values($table, $values) {
-	// TODO
-	if ($table == "qtr_reputation") {
-		$sorted_values = array ();
-		foreach ($values as $i => $value) {
-			$sorted_values += array (
-				$i => $values[$i]['reputation']
-			);
-		}
-		arsort($sorted_values);
-	}
-	switch ($table) {
-		case "qtr_reputation" :
-			$time=strtotime('now');
-			$latestTime=db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
-			if($latestTime){
-				$monthnow=(int)date('m',$time);
-				$monthlast=(int)date('m',$latestTime[0]); 
-				if($monthnow<=$monthlast){//overwrite the reputation 
-				 $del = db_delete('qtr_reputation')->condition('timestamp',$latestTime)->execute();
-				}
-			}
-			
-			$i = 1;
-			$count = count($sorted_values);
-			if ($count){				
-				foreach ($sorted_values as $id => $value) {
-					$sql = "";
-					db_insert('qtr_reputation')->fields(array (
-						'uid' => $id,
-						'rank' => $i,
-						'reputation' => $value,
-						'percentile'=>$i/$count,
-						'timestamp'=>$time,
-					))->execute();
-					$i++;
-				}
-			}
-			break;
-		case "qtr_quality" :
-			$del = db_delete('qtr_quality')->execute();
-			if (count($values))
-				foreach ($values as $id => $value) {
-					db_insert('qtr_quality')->fields(array (
-						'nid' => $id,
-						'quality' => $value['quality']
-					))->execute();
-				}
-			break;
-
-	}
+  // TODO
+  if ($table == "qtr_reputation") {
+  	$sorted_values = array ();
+  	foreach ($values as $i => $value) {
+  		$sorted_values += array (
+  			$i => $values[$i]['reputation']
+  		);
+  	}
+  	arsort($sorted_values);
+  }
+  switch ($table) {
+  	case "qtr_reputation" :
+  		$time=strtotime('now');
+  		$latestTime=db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
+  		if($latestTime){
+  			$monthnow=(int)date('m',$time);
+  			$monthlast=(int)date('m',$latestTime[0]); 
+  			if($monthnow<=$monthlast){//overwrite the reputation 
+  			 $del = db_delete('qtr_reputation')->condition('timestamp',$latestTime)->execute();
+  			}
+  		}
+  		
+  		$i = 1;
+  		$count = count($sorted_values);
+  		if ($count){				
+  			foreach ($sorted_values as $id => $value) {
+  				$sql = "";
+  				db_insert('qtr_reputation')->fields(array (
+  					'uid' => $id,
+  					'rank' => $i,
+  					'reputation' => $value,
+  					'percentile'=>$i/$count,
+  					'timestamp'=>$time,
+  				))->execute();
+  				$i++;
+  			}
+  		}
+  		break;
+  	case "qtr_quality" :
+  		$del = db_delete('qtr_quality')->execute();
+  		if (count($values))
+  			foreach ($values as $id => $value) {
+  				db_insert('qtr_quality')->fields(array (
+  					'nid' => $id,
+  					'quality' => $value['quality']
+  				))->execute();
+  			}
+  		break;
+  
+  }
 }
 
 // GET ACTIONS
@@ -113,11 +113,11 @@ function qtr_write_values($table, $values) {
  */
 function qtr_get_actions() {
 
-	//use join search from qtr_action and qtr_action_types to get action and weight values directly 
-	$actions = db_query("SELECT a.uid, a.nid, at.action, a.timestamp, at.weight 
-			                   FROM {qtr_actions} AS a LEFT JOIN {qtr_action_types} AS at ON at.id=a.action_type 
-			                   INNER JOIN {node} AS n ON n.nid=a.nid where n.type IN (select item_type from {qtr_item_types})")->fetchALL();
-	return $actions;
+  //use join search from qtr_action and qtr_action_types to get action and weight values directly 
+  $actions = db_query("SELECT a.uid, a.nid, at.action, a.timestamp, at.weight 
+                         FROM {qtr_actions} AS a LEFT JOIN {qtr_action_types} AS at ON at.id=a.action_type 
+                         INNER JOIN {node} AS n ON n.nid=a.nid where n.type IN (select item_type from {qtr_item_types})")->fetchALL();
+  return $actions;
 
 }
 
@@ -129,21 +129,21 @@ function qtr_get_actions() {
  */
 
 function qtr_get_value($table, $field, $id) {
-	switch ($table) {
-		case "qtr_reputation" :
-			$latestTime=db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
-			$query = db_select('qtr_reputation', 'q');
-			$result = $query->fields('q',array($field))->condition('uid', $id)->condition('timestamp', $latestTime[0])->execute()->fetchCol();
-			return $result;
-			break;
-		case "qtr_quality" :
-			$query = db_select('qtr_quality', 'q');
-			$result = $query->fields('q',array($field))->condition('nid', $id)->execute()->fetchCol();
-			return $result;
-			break;
-			break;
+  switch ($table) {
+    case "qtr_reputation" :
+      $latestTime=db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
+      $query = db_select('qtr_reputation', 'q');
+      $result = $query->fields('q',array($field))->condition('uid', $id)->condition('timestamp', $latestTime[0])->execute()->fetchCol();
+      return $result;
+      break;
+    case "qtr_quality" :
+      $query = db_select('qtr_quality', 'q');
+      $result = $query->fields('q',array($field))->condition('nid', $id)->execute()->fetchCol();
+      return $result;
+      break;
+      break;
 
-	}
+  }
 }
 
 // QTR ADD NODE TYPE
@@ -154,20 +154,20 @@ function qtr_get_value($table, $field, $id) {
  * @param {mixed} $types The node types
  */
 function qtr_update_itemtype($types = array ()) {
-	//delete current item types
-	$del = db_delete('qtr_item_types')->execute();
-	//add new item types
-	foreach ($types as $type) {
-		$type += array (
-			'reference_table' => 'node',
+  //delete current item types
+  $del = db_delete('qtr_item_types')->execute();
+  //add new item types
+  foreach ($types as $type) {
+    $type += array (
+      'reference_table' => 'node',
 
-			
-		);
-		db_insert('qtr_item_types')->fields(array (
-			'item_type' => $type['item_type'],
-			'reference_table' => $type['reference_table']
-		))->execute();
-	}
+      
+    );
+    db_insert('qtr_item_types')->fields(array (
+      'item_type' => $type['item_type'],
+      'reference_table' => $type['reference_table']
+    ))->execute();
+  }
 }
 
 /**
@@ -175,13 +175,13 @@ function qtr_update_itemtype($types = array ()) {
  * get item types from qtr_item_types table
  */
 function qtr_get_itemtype() {
-	$query = db_select('qtr_item_types', 'q');
-	$result = $query->fields('q')->execute()->fetchAll();
-	if (!empty ($result)) {
-		return $result;
-	} else {
-		return FALSE;
-	}
+  $query = db_select('qtr_item_types', 'q');
+  $result = $query->fields('q')->execute()->fetchAll();
+  if (!empty ($result)) {
+  	return $result;
+  } else {
+  	return FALSE;
+  }
 }
 
 // QTR ADD ACTION TYPE
@@ -194,15 +194,15 @@ function qtr_get_itemtype() {
  * @param {mixed} $description The description associated to the action
  */
 function qtr_add_actiontype($type = NULL, $weight = 0, $description = NULL) {
-	if (is_null($type))
-		return;
-	else {
-		db_insert('qtr_action_types')->fields(array (
-			'action' => $type,
-			'weight' => $weight,
-			'description' => $description
-		))->execute();
-	}
+  if (is_null($type))
+    return;
+  else {
+    db_insert('qtr_action_types')->fields(array (
+      'action' => $type,
+      'weight' => $weight,
+      'description' => $description
+    ))->execute();
+  }
 
 }
 
@@ -236,10 +236,10 @@ function qtr_get_actiontype($aid = null) {
  * update action weight
  */
 function qtr_update_actionweight($action, $weight) {
-	db_query("UPDATE {qtr_action_types} SET weight = :weight WHERE action = :action", array (
-		'weight' => $weight,
-		'action' => $action
-	));
+  db_query("UPDATE {qtr_action_types} SET weight = :weight WHERE action = :action", array (
+  	'weight' => $weight,
+  	'action' => $action
+  ));
 
 }
 
@@ -304,33 +304,33 @@ $result = db_query($sql)->fetchAll();
  * This is where actions are gathered on page accesses.
  */
 function qtr_exit() {
-	global $user;
-	$uid = $user->uid;
-	if($uid==0)
-	return;
+  global $user;
+  $uid = $user->uid;
+  if($uid==0)
+  return;
 
-	drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
-	drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
 
-	// For anonymous users unicode.inc will not have been loaded.
-	include_once DRUPAL_ROOT . '/includes/unicode.inc';
-	// Log this page access.
-	$nid = '';
-	$aid = '';
-	if (arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == NULL) {
-		$nid = arg(1);
-		$aid = 3;
-	} else
-		if (arg(0) == 'paper' && arg(1) == 'download' && is_numeric(arg(2))) {
-			$nid = arg(2);
-			$aid = 2;
-		} else
-			if (arg(0) == 'plus1' && arg(1) == 'vote' && arg(2) == 'node' && is_numeric(arg(3))) {
-				$nid = arg(3);
-				$aid = 1;
-			}
+  // For anonymous users unicode.inc will not have been loaded.
+  include_once DRUPAL_ROOT . '/includes/unicode.inc';
+  // Log this page access.
+  $nid = '';
+  $aid = '';
+  if (arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == NULL) {
+  	$nid = arg(1);
+  	$aid = 3;
+  } else
+  	if (arg(0) == 'paper' && arg(1) == 'download' && is_numeric(arg(2))) {
+  		$nid = arg(2);
+  		$aid = 2;
+  	} else
+  		if (arg(0) == 'plus1' && arg(1) == 'vote' && arg(2) == 'node' && is_numeric(arg(3))) {
+  			$nid = arg(3);
+  			$aid = 1;
+  		}
 
-	qtr_write_action($uid, $nid, $aid);
+  qtr_write_action($uid, $nid, $aid);
 }
 
 /**
@@ -338,33 +338,33 @@ function qtr_exit() {
  *
  */
 function qtr_chart_reputation($uid) {
-	$user=user_load($uid);
+  $user=user_load($uid);
 
-	$query = db_select('qtr_reputation', 'q');
-	$result = $query->fields('q',array('percentile','timestamp'))->condition('uid', $uid)->orderBy('timestamp','asc')->range(0,12)->execute()->fetchAll();
-	$percentile = array();
-	$chxl='0:|';
-	for($i=11;$i>=0;$i--){
-		$month=date('m-y', strtotime("-".$i." months"));
-		$percentile[$month]=0;
-		$chxl.=$month.'|';
-	}
-	$chxl.='2:|Percentile/Month-Year';
-	$max=0;
-	foreach($result as $repu){
-		if($repu->percentile){
-			$percentile[date('m-y',$repu->timestamp)]=1-$repu->percentile;
-			if(1-$repu->percentile>$max)
-			$max=1-$repu->percentile;
-		}
-			
-	}
-	$chxr='1,0,'.($max+0.1)*100;
-	$chd='t:';
-	foreach($percentile as $key=>$value){
-		$chd.=$value.',';
-	}
-	$chd=trim($chd,',');
+  $query = db_select('qtr_reputation', 'q');
+  $result = $query->fields('q',array('percentile','timestamp'))->condition('uid', $uid)->orderBy('timestamp','asc')->range(0,12)->execute()->fetchAll();
+  $percentile = array();
+  $chxl='0:|';
+  for($i=11;$i>=0;$i--){
+  	$month=date('m-y', strtotime("-".$i." months"));
+  	$percentile[$month]=0;
+  	$chxl.=$month.'|';
+  }
+  $chxl.='2:|Percentile/Month-Year';
+  $max=0;
+  foreach($result as $repu){
+  	if($repu->percentile){
+  		$percentile[date('m-y',$repu->timestamp)]=1-$repu->percentile;
+  		if(1-$repu->percentile>$max)
+  		$max=1-$repu->percentile;
+  	}
+  		
+  }
+  $chxr='1,0,'.($max+0.1)*100;
+  $chd='t:';
+  foreach($percentile as $key=>$value){
+  	$chd.=$value.',';
+  }
+  $chd=trim($chd,',');
 
 
 
