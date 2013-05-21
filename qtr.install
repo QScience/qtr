@@ -1,5 +1,9 @@
 <?php
-
+/**
+ *
+ *
+ *
+ */
 function qtr_schema() {
 
     $schema['qtr_item_types'] = array(
@@ -103,7 +107,7 @@ function qtr_schema() {
         'indexes' => array(
             'qtr_user' => array('uid'),
             'qtr_action_type' => array('action_type'),
-             'qtr_time'=>array('timestamp'),
+             'qtr_time' => array('timestamp'),
         ),
     );
 
@@ -197,15 +201,15 @@ function qtr_install() {
    $query = db_select('votingapi_vote', 'q');
    $results = $query->fields('q')->execute()->fetchAll();
    if ($results) {
-   	foreach($results as $result){
-   		if($result->tag == 'plus1_node_vote'&& $result->value>0)
-   		db_insert('qtr_actions')->fields(array('uid' => $result->uid, 'nid' => $result->entity_id, 'action_type'=>1,'timestamp'=>$result->timestamp))->execute();
-   	}
+   foreach ($results as $result) {
+   if ($result->tag == 'plus1_node_vote' && $result->value>0)
+   db_insert('qtr_actions')->fields(array('uid' => $result->uid, 'nid' => $result->entity_id, 'action_type' => 1, 'timestamp' => $result->timestamp))->execute();
+   }
    }
    $result = array();
   foreach (node_type_get_types() as $type => $type_obj) {
-  	$result[]=array('item_type'=>$type);
-  	variable_set('popular_block_' . $type, $type);
+  $result[] = array('item_type' => $type);
+  variable_set('popular_block_' . $type, $type);
   }
   qtr_update_itemtype($result);
 }

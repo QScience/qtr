@@ -1,4 +1,8 @@
 <?php
+/*
+ * @file
+ * qtr module
+ */
 
 require_once 'qtr.inc';
 require_once 'qtr.api.inc';
@@ -57,22 +61,23 @@ function qtr_permission() {
 function qtr_run_form($form, &$form_state) {
   $form['description'] = array(
     '#markup' => '<p>' . t('You can specify !cron frequency to run the QTR. Click the button run now:', 
-      array('!cron' => t(l('cron', 'admin/config/system/cron')))) . '</p>',
+      array('!cron' => l(t('cron'), 'admin/config/system/cron'))) . '</p>',
   );
   $form['run'] = array(
     '#type' => 'submit',
     '#value' => t('Run QTR'),
     '#submit' => array('qtr_demo'),
   );
-  return $form;	
+  return $form;
 }
 
 function qtr_set_form($form, &$form_state) {
   $form= array();
-  $posttype = array ();$default = array();
+  $posttype = array();
+  $default = array();
   $types=qtr_get_itemtype();
-  if($types) {
-    foreach($types as $type) {
+  if ($types) {
+    foreach ($types as $type) {
       $default[]=$type->item_type;
     }
   }
@@ -215,8 +220,8 @@ function qtr_from_db($trust = NULL) {
   $agent = $item = NULL;
  // _qtr_init($agent, $item, 50, 1000);
   _qtr_read($agent, $item, $trust);
-  $start=strtotime('now');
-  if(count($agent)&&count($item)) {
+  $start = strtotime('now');
+  if (count($agent)&&count($item)) {
     _qtr_calculate($agent, $item, $trust, $start);
     qtr_write_values('qtr_reputation', $agent);
     qtr_write_values('qtr_quality', $item);
@@ -299,68 +304,68 @@ function qtr_block_save($delta, $edit = array()) {
 
 function qtr_block_view($delta = '') {
   if ($delta == 'popular') {
-    $contents='	<div class="title_block_head">
-						<h2>Top papers</h2>	
-						<div id="tab_menu">
-							<a href="javascript:;" id="cont-1" class="tabLink active_tab">Top value</a>
-							<a href="javascript:;" id="cont-2" class="tabLink ">Most downloads</a>
-							<a href="javascript:;" id="cont-3" class="tabLink ">Most votes</a>
-							<div class="clear"></div>
-						</div>
-					</div>';
+    $contents = '<div class="title_block_head">
+<h2>Top papers</h2>
+<div id="tab_menu">
+<a href="javascript:;" id="cont-1" class="tabLink active_tab">Top value</a>
+<a href="javascript:;" id="cont-2" class="tabLink ">Most downloads</a>
+<a href="javascript:;" id="cont-3" class="tabLink ">Most votes</a>
+<div class="clear"></div>
+</div>
+</div>';
     $contents .= '<div class="content_box">
-						<div class="tabcontent" id="cont-1-1">
-							<ul class="red_arrow_li">';
+<div class="tabcontent" id="cont-1-1">
+<ul class="red_arrow_li">';
     $showlist = qtr_get_topquality(5);
     if ($showlist) {
       foreach ($showlist as $list) {
-        $contents .= '<li><a href="'.url('node/' . $list->nid) . '" target="_blank">' . $list->title . "</a></li>";
+        $contents .= '<li><a href="' . url('node/' . $list->nid) . '" target="_blank">' . $list->title . "</a></li>";
             }
         }
         else {
             $contents .='No polular content yet.';
         }
         $contents .= '</ul>
-						<div class="right_align">
-								<a href="' . url('papers/popular') . '" class="red_see_more2">Show more</a>
-							</div>
-						</div>
-						<div class="tabcontent hide" id="cont-2-1"><ul class="red_arrow_li">';
-        $showlist = qtr_get_topitems(5,2,30);
+<div class="right_align">
+<a href="' . url('papers/popular') . '" class="red_see_more2">Show more</a>
+</div>
+</div>
+<div class="tabcontent hide" id="cont-2-1"><ul class="red_arrow_li">';
+        $showlist = qtr_get_topitems(5, 2, 30);
         if ($showlist) {
             foreach ($showlist as $list) {
-                $contents .= '<li><a href="' . url('node/' . $list->nid) . '" target="_blank">' . $list->title . '</a> <span class="grey_text3">(' . $list->count." downloads)</span></li>";
+                $contents .= '<li><a href="' . url('node/' . $list->nid) . '" target="_blank">' . $list->title . '</a> <span class="grey_text3">(' . $list->count . " downloads)</span></li>";
             }
         }
         else {
             $contents .='No polular content yet.';
         }
-		$contents .= '</ul><div class="right_align">
-								<a href="' . url('papers/popular',array('query'=>array('order'=>'download'))) . '" class="red_see_more2">Show more</a>
-							</div></div><div class="tabcontent hide" id="cont-3-1"><ul class="red_arrow_li">';
-    $showlist = qtr_get_topitems(5,1,30);
+$contents .= '</ul><div class="right_align">
+<a href="' . url('papers/popular', array('query' => array('order' => 'download'))) . '" class="red_see_more2">Show more</a>
+</div></div><div class="tabcontent hide" id="cont-3-1"><ul class="red_arrow_li">';
+    $showlist = qtr_get_topitems(5, 1, 30);
     if ($showlist) {
             foreach ($showlist as $list) {
-                $contents .= '<li><a href="' . url('node/' . $list->nid) . '" target="_blank">' . $list->title . '</a> <span class="grey_text3">(' . $list->count." votes)</span></li>";
+                $contents .= '<li><a href="' . url('node/' . $list->nid) . '" target="_blank">' . $list->title . '</a> <span class="grey_text3">(' . $list->count . " votes)</span></li>";
             }
         }
         else {
             $contents .= 'No polular content yet.';
         }
         $contents .= '</ul><div class="right_align">
-								<a href="' . url('papers/popular',array('query'=>array('order'=>'vote'))) . '" class="red_see_more2">Show more</a>
-							</div></div></div>';
-				
+<a href="' . url('papers/popular', array('query' => array('order' => 'vote'))) . ' "class="red_see_more2">Show more</a>
+</div></div></div>';
+
    
   /*      $showlist = qtr_get_topquality(5);
         $blocks['subject'] = 'Highlighted contents';
-		$contents='<ul class="option">
-			<span class="optionlink optionlinkon" id="byquality"><a
-		href="javascript:PopByQuality()"><span class="Clink">top papers</span></a>
-	</span>
-			<span class="optionlink optionlinkoff" id="bydownload"><a
-		href="javascript:PopByBownload()"><span class="Clink">most downloads</span></a>
-	</span>
+$contents='<ul class="option">
+<span class="optionlink optionlinkon" id="byquality"><a
+href="javascript:PopByQuality()"><span class="Clink">top papers</span></a>
+</span>
+<span class="optionlink optionlinkoff" id="bydownload"><a
+href="javascript:PopByBownload()"><span class="Clink">most downloads</span></a>
+</span>
 </ul>';
         $contents .= '<div class="Visible" id="quality"><ul>';
         if ($showlist) {
@@ -395,9 +400,8 @@ function qtr_block_view($delta = '') {
  */
 
 function qtr_cron() {
-	if(variable_get('qtr_updatetime', 0)+24*3600<strtotime('now')) {
-		variable_set('qtr_updatetime', strtotime('now')-50);
-    qtr_demo();	
+  if (variable_get('qtr_updatetime', 0)+24*3600<strtotime('now')) {
+    variable_set('qtr_updatetime', strtotime('now')-50);
+    qtr_demo();
   }
 }
-

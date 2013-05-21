@@ -4,18 +4,18 @@
  * Hook functions for Patterns integration
  */
 
-function qtr_patterns($data = NULL){
-	
+function qtr_patterns($data = NULL) {
+
   $tags['qtr_parameters']=array(
     PATTERNS_INFO   => t('qtr parameters'),
     PATTERNS_MODIFY => array('qtr_settings'),
-    PATTERNS_EXPORT => array(PATTERNS_EXPORT_ALL => 'qtr_patterns_export_parameters',),
+    PATTERNS_EXPORT => array(PATTERNS_EXPORT_ALL => 'qtr_patterns_export_parameters', ),
     );
 
   $tags['qtr_item']=array(
     PATTERNS_INFO   => t('qtr item'),
     PATTERNS_MODIFY => array('qtr_set_form'),
-    PATTERNS_EXPORT => array(PATTERNS_EXPORT_ALL => 'qtr_patterns_export_item',),
+    PATTERNS_EXPORT => array(PATTERNS_EXPORT_ALL => 'qtr_patterns_export_item', ),
     );
 
   return $tags;
@@ -115,7 +115,7 @@ function qtr_patterns_validate($action, $tag, &$data) {
           foreach ($data as $key => $value) {
             if (!in_array($key, $params)) {
               unset($data[$key]);
-              $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED => t('Not valid Key: %k', array('%k' => $key)),);
+              $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED => t('Not valid Key: %k', array('%k' => $key)), );
             }
             else {
               $count++;
@@ -138,11 +138,11 @@ function qtr_patterns_validate($action, $tag, &$data) {
           $content_type_Now = node_type_get_types();
           if (isset($data['contenttype'])) {
             foreach ($data['contenttype'] as $key => $value) {
-              $sign = false;
+              $sign = FALSE;
               foreach ($content_type_Now as $type => $type_obj) {
                 if ($value==$type_obj->name) {
                   $data['content_type'][]=$type;
-                  $sign = true;
+                  $sign = TRUE;
                   break;
                 }
               }

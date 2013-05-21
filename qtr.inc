@@ -71,7 +71,7 @@ function _qtr_read(&$agent, &$item, $trust) {
 //    $rating = (string) $action->action;
     $time = (int) $action->timestamp;
     $rw = $action->weight;
-    if( !isset($agent[$i]) ) {
+    if (!isset($agent[$i])) {
       $agent[$i]=array(
     'reputation' => 0.0, // reputation value
     'r_tmp' => 0.0,
@@ -83,8 +83,8 @@ function _qtr_read(&$agent, &$item, $trust) {
   );
  
     }
-    if( !isset($item[$a]) ) {
-    	$item[$a] = array(
+    if (!isset($item[$a])) {
+      $item[$a] = array(
     'quality' => 0.0, // quality value
     'q_tmp' => 0.0,
     'reader' => array(), // ID of users who interacted with item
