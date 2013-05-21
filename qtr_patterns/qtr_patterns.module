@@ -80,53 +80,6 @@ function qtr_patterns_export_parameters($args = NULL, $result = NULL) {
  * hook_patterns_prepare()
  */
 function qtr_patterns_prepare($action, $tag, &$data) {
-  // parameters.
-  module_load_include('inc', 'qtr', 'api');
-  if ($tag == 'qtr_parameters') {
-    if ($action == PATTERNS_MODIFY ) {
-      $params = array();
-      $params[] = 'qtr_delta';
-      $param_type = qtr_get_actiontype();
-      if ($param_type) {
-          foreach ($param_type as $pt ) {
-            $params[] = 'qtr_w_' . $pt ->action;
-          }
-      }
-      $params[] = 'qtr_decay';
-      $params[] = 'qtr_tau0';
-      $params[] = 'qtr_renorm_q';
-      $params[] = 'qtr_renorm_r';
-      $params[] = 'qtr_renorm_t';
-      $params[] = 'qtr_resc_q';
-      $params[] = 'qtr_resc_r';
-      $params[] = 'qtr_resc_t';
-      foreach ($data as $key => $value) {
-        if (!in_array($key, $params)) {
-          unset($data[$key]);
-        }
-      }
-    }
-  }
-
-  // item.
-  if ($tag == 'qtr_item') {
-    if ($action == PATTERNS_MODIFY ) {
-      //$data['content_type'][]='article';
-      //$data['content_type'][]='page';
-      //dump($data['contenttype']);
-      unset($data['content_type']);
-      foreach (node_type_get_types() as $type => $type_obj) {
-        //drupal_set_message($type);
-        foreach ($data['contenttype'] as $key => $value) {
-          if ($value==$type_obj->name) {
-            $data['content_type'][]=$type;
-            break;
-          }
-        }
-      }
-    }
-  }
-
   return patterns_results();
 }
 
@@ -140,25 +93,74 @@ function qtr_patterns_validate($action, $tag, &$data) {
     case 'qtr_parameters' :
       switch ($action) {
         case PATTERNS_MODIFY :
-          if (empty($data)) {
-            $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED=> 
-                t('no valid parameters'));
-          } 
+          $params = array();
+          $params[] = 'qtr_delta';
+          $param_type = qtr_get_actiontype();
+          if ($param_type) {
+              foreach ($param_type as $pt ) {
+                $params[] = 'qtr_w_' . $pt ->action;
+              }
+          }
+          $params[] = 'qtr_decay';
+          $params[] = 'qtr_tau0';
+          $params[] = 'qtr_renorm_q';
+          $params[] = 'qtr_renorm_r';
+          $params[] = 'qtr_renorm_t';
+          $params[] = 'qtr_resc_q';
+          $params[] = 'qtr_resc_r';
+          $params[] = 'qtr_resc_t';
+
+          $msg = 'these keys are not existed in system: ';
+          $count = 0;
+          foreach ($data as $key => $value) {
+            if (!in_array($key, $params)) {
+              unset($data[$key]);
+              $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED => t('Not valid Key: %k', array('%k' => $key)),);
+            }
+            else {
+              $count++;
+            }
+          }
+          if (count == 0) {
+            $msg = 'no valid keys.';
+            $status = PATTERNS_ERR;
+            return patterns_results($status, $msg, $result);
+          }
+
         break;
       }
       break;
-
-    //shortcut_link tag.
+    //qtr_item
     case 'qtr_item' :
       switch ($action) {
         case PATTERNS_MODIFY :
-          if (empty($data['content_type'])) {
-            $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED=> 
-                t('no valid item type'));
-          } 
+          unset($data['content_type']);
+          $content_type_Now = node_type_get_types();
+          if (isset($data['contenttype'])) {
+            foreach ($data['contenttype'] as $key => $value) {
+              $sign = false;
+              foreach ($content_type_Now as $type => $type_obj) {
+                if ($value==$type_obj->name) {
+                  $data['content_type'][]=$type;
+                  $sign = true;
+                  break;
+                }
+              }
+              if (!$sign) {
+                $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED => t('Not valid value: %k', array('%k' => $value)));
+              }
+            }
+          }
+
+          if (!isset($data['content_type']) || !count($data['content_type'])) {
+            $msg = 'Mandatory data content_type is missing';
+            $status = PATTERNS_ERR;
+            return patterns_results($status, $msg, $result);
+          }
           break;
       }
       break;
+
   }
   return patterns_results($status, $msg, $result);
 }

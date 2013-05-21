@@ -15,6 +15,6 @@ actions:
   - modify:
       tag: qtr_item
       contenttype: 
-        Article: article
-        Basic page: page
-
+        - Article 
+        - Basic page
+        - xeik
