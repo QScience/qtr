@@ -1,7 +1,7 @@
 <?php
 /**
- *
- *
+ * @file
+ * qtr instll
  *
  */
 function qtr_schema() {

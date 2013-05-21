@@ -65,12 +65,12 @@ function qtr_write_values($table, $values) {
   switch ($table) {
     case "qtr_reputation" :
       $time =  strtotime('now');
-    $latestTime = db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
-    if ($latestTime) {
+    $latesttime = db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
+    if ($latesttime) {
       $monthnow = (int)date('m', $time);
-      $monthlast = (int)date('m', $latestTime[0]); 
+      $monthlast = (int)date('m', $latesttime[0]); 
       if ($monthnow <= $monthlast) {//overwrite the reputation 
-        $del = db_delete('qtr_reputation')->condition('timestamp', $latestTime)->execute();
+        $del = db_delete('qtr_reputation')->condition('timestamp', $latesttime)->execute();
       }
     }
 
@@ -131,9 +131,9 @@ function qtr_get_actions() {
 function qtr_get_value($table, $field, $id) {
   switch ($table) {
     case "qtr_reputation" :
-      $latestTime = db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
+      $latesttime = db_query('select timestamp from {qtr_reputation} order by timestamp desc limit 1')->fetchCol();
     $query = db_select('qtr_reputation', 'q');
-    $result = $query->fields('q', array($field))->condition('uid', $id)->condition('timestamp', $latestTime[0])->execute()->fetchCol();
+    $result = $query->fields('q', array($field))->condition('uid', $id)->condition('timestamp', $latesttime[0])->execute()->fetchCol();
     return $result;
     break;
     case "qtr_quality" :
