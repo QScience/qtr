@@ -110,18 +110,18 @@ function qtr_patterns_validate($action, $tag, &$data) {
           $params[] = 'qtr_resc_r';
           $params[] = 'qtr_resc_t';
 
-          $msg = 'these keys are not existed in system: ';
+          $msg = 'these keys are not valid:';
           $count = 0;
           foreach ($data as $key => $value) {
             if (!in_array($key, $params)) {
               unset($data[$key]);
-              $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED => t('Not valid Key: %k', array('%k' => $key)), );
+              $result[] = array('PATTERNS_WARNING_ELEMENT_UNDEFINED' => t('Not valid Key: %k', array('%k' => $key)), );
             }
             else {
               $count++;
             }
           }
-          if (count == 0) {
+          if ($count == 0) {
             $msg = 'no valid keys.';
             $status = PATTERNS_ERR;
             return patterns_results($status, $msg, $result);
@@ -147,7 +147,7 @@ function qtr_patterns_validate($action, $tag, &$data) {
                 }
               }
               if (!$sign) {
-                $result[] = array(PATTERNS_WARNING_ELEMENT_UNDEFINED => t('Not valid value: %k', array('%k' => $value)));
+                $result[] = array('PATTERNS_WARNING_ELEMENT_UNDEFINED' => t('Not valid value: %k', array('%k' => $value)));
               }
             }
           }
